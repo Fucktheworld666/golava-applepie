@@ -1,5 +1,4 @@
-﻿using System;
-namespace GoLava.ApplePie.Clients.Portal
+﻿namespace GoLava.ApplePie.Clients.Portal
 {
     public class PortalUrlProvider : UrlProviderBase, IPortalUrlProvider
     {
@@ -8,6 +7,8 @@ namespace GoLava.ApplePie.Clients.Portal
         public const string BaseUrl = "https://developer.apple.com/services-account/" + ProtocolVersion + "/account/";
 
         public string DevicesUrl => BaseUrl + "{platform}/device/listDevices.action";
+
+        public string AddDevicesUrl => BaseUrl + "{platform}/device/addDevices.action";
 
         public string TeamsUrl => BaseUrl + "getTeams";
 

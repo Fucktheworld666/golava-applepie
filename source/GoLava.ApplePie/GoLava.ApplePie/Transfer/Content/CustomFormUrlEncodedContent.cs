@@ -1,6 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Net.Http;
+using System.Text;
+using System.ComponentModel;
+using GoLava.ApplePie.Transfer.Resolvers;
 
 namespace GoLava.ApplePie.Transfer.Content
 {
@@ -8,6 +15,8 @@ namespace GoLava.ApplePie.Transfer.Content
     {
         public CustomFormUrlEncodedContent(object content)
             : base(Convert(content)) { }
+
+        private static CustomPropertyNamesContractResolver _resolver = new CustomPropertyNamesContractResolver();
 
         private static IEnumerable<KeyValuePair<string, string>> Convert(object content)
         {
@@ -22,11 +31,56 @@ namespace GoLava.ApplePie.Transfer.Content
             var parametersType = content.GetType();
             foreach (var property in parametersType.GetProperties())
             {
-                var value = property.GetMethod.Invoke(content, null);
-                list.Add(new KeyValuePair<string, string>(property.Name, value.ToString()));
+                var value = ConvertValue(property.GetMethod.Invoke(content, null));
+                var name = ConvertName(property.Name);
+                list.Add(new KeyValuePair<string, string>(name, value));
             }
 
             return list;
+        }
+
+        private static string ConvertName(string name)
+        {
+            return _resolver.GetResolvedPropertyName(name);
+        }
+
+        private static string ConvertValue(object value)
+        {
+            if (value == null)
+                return string.Empty;
+                    
+            if (value is string s)
+                return s;
+
+            if (value is int i)
+                return i.ToString(CultureInfo.InvariantCulture);
+
+            if (value is long l)
+                return l.ToString(CultureInfo.InvariantCulture);
+
+            if (value is Enum e)
+                return GetEnumDescription(e);
+            
+            if (value is IEnumerable collection)
+            {
+                var sb = new StringBuilder();
+                foreach (var v in collection)
+                {
+                    if (sb.Length > 0)
+                        sb.Append(",");
+                    sb.Append(ConvertValue(v));
+                }
+                return sb.ToString();
+            }
+
+            return value.ToString();
+        }
+
+        public static string GetEnumDescription(Enum value)
+        {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+            var attribute = fieldInfo.GetCustomAttribute<DescriptionAttribute>();
+            return attribute != null ? attribute.Description : value.ToString();
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using GoLava.ApplePie.Contracts.Portal;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
@@ -44,6 +43,34 @@ namespace GoLava.ApplePie.Clients.Portal
             return devicesResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
         }
 
+        public async Task<List<Device>> AddDeviceAsync(ClientContext context, string teamId, string uiid, string name, DeviceClass deviceClass, string platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var result = await this.AddDevicesAsync(context, teamId, new NewDevices
+            {
+                DeviceClasses = new List<DeviceClass> { deviceClass },
+                DeviceNames = new List<string> { name },
+                DeviceNumbers = new List<string> { uiid },
+                Register = "single"
+            }, platform);
+            return result.Data;
+        }
+
+        private async Task<Result<List<Device>>> AddDevicesAsync(ClientContext context, string teamId, NewDevices newDevices, string platform)
+        {
+            await Configure.AwaitFalse();
+
+            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.AddDevicesUrl, new { platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", teamId }
+            });
+            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, newDevices);
+            var response = await this.SendAsync<Result<List<Device>>>(context, request);
+            context.DeleteValue<PageResult<Device>>(teamId);
+            return response.Content;
+        }
+
         private async Task<List<PageResult<Device>>> GetDevicesResultsAsync(ClientContext context, string teamId, string platform)
         {
             await Configure.AwaitFalse();
@@ -69,18 +96,8 @@ namespace GoLava.ApplePie.Clients.Portal
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new UriBuilder(request.Uri);
-            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-
-            query["content-type"] = "text/x-url-arguments";
-            query["accept"] = "application/json";
-            query["userLocale"] = "en_US";
-
-            if (queryValues != null)
-            {
-                foreach (var keyValue in queryValues)
-                    query[keyValue.Key] = keyValue.Value;
-            }
+            var uriBuilder = new PortalRequestUriBuilder(request.Uri);
+            uriBuilder.AddQueryValues(queryValues);
 
             var pages = new List<TPageResult>();
 
@@ -91,10 +108,7 @@ namespace GoLava.ApplePie.Clients.Portal
             var count = 0;
             do
             {
-                query["requestId"] = Guid.NewGuid().ToString("D");
-                uriBuilder.Query = query.ToString();
-
-                request.Uri = new RestUri(uriBuilder.ToString());
+                request.Uri = uriBuilder.ToUri();
                 request.Content = new
                 {
                     nd,

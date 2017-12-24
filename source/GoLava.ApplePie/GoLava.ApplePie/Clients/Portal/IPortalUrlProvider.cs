@@ -4,6 +4,8 @@
     {
         string DevicesUrl { get; }
 
+        string AddDevicesUrl { get; }
+
         string TeamsUrl { get; }
 
         string TeamMembersUrl { get; }

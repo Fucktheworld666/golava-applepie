@@ -26,6 +26,12 @@ namespace GoLava.ApplePie.Clients
             _stash.AddOrUpdate(lookupKey, item, (n, v) => item);
         }
 
+        internal bool DeleteValue<T>(params object[] keys)
+        {
+            var lookupKey = CreateLookupKey<T>(keys);
+            return _stash.TryRemove(lookupKey, out object unused);
+        }
+
         internal bool TryGetValue<T>(out T item, params object[] keys)
         {
             var lookupKey = CreateLookupKey<T>(keys);

@@ -32,6 +32,8 @@ namespace GoLava.ApplePie.App
                     var devices = await client.GetDevicesAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: devices count: {1}", team.TeamId, devices.Count);
 
+                    var addedDevices = await client.AddDeviceAsync(context, team.TeamId, "1111111111111111111111111111111111111112", "test", Contracts.Portal.DeviceClass.iPhone);
+                    Console.WriteLine("Team {0}: added devices count: {1}", team.TeamId, addedDevices.Count);
                 }
             }
         }

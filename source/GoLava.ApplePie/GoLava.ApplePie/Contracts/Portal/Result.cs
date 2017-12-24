@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using GoLava.ApplePie.Contracts.Attributes;
+
 namespace GoLava.ApplePie.Contracts.Portal
 {
     public class Result
@@ -16,5 +19,11 @@ namespace GoLava.ApplePie.Contracts.Portal
         public string ProtocolVersion { get; set; }
 
         public string UserString { get; set; }
+    }
+
+    public class Result<TData> : Result
+    {
+        [JsonDataClassProperty]
+        public TData Data { get; set; }
     }
 }
