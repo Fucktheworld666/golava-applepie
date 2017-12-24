@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoLava.ApplePie", "GoLava.ApplePie\GoLava.ApplePie.csproj", "{44264912-8C08-4C38-944F-F383990B9A1B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoLava.ApplePie.App", "GoLava.ApplePie.App\GoLava.ApplePie.App.csproj", "{2351EA63-C1F8-478E-99BF-E1DC79D33D06}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{44264912-8C08-4C38-944F-F383990B9A1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44264912-8C08-4C38-944F-F383990B9A1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44264912-8C08-4C38-944F-F383990B9A1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44264912-8C08-4C38-944F-F383990B9A1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2351EA63-C1F8-478E-99BF-E1DC79D33D06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2351EA63-C1F8-478E-99BF-E1DC79D33D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2351EA63-C1F8-478E-99BF-E1DC79D33D06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2351EA63-C1F8-478E-99BF-E1DC79D33D06}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

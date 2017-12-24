@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Transfer\" />
+    <Folder Include="Transfer\Content\" />
+    <Folder Include="Transfer\Cookies\" />
+    <Folder Include="Threading\" />
+    <Folder Include="Formatting\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Clients\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="Clients\Portal\" />
+    <Folder Include="Contracts\Portal\" />
+    <Folder Include="Transfer\Handlers\" />
+    <Folder Include="Contracts\Converters\" />
+    <Folder Include="Contracts\Attributes\" />
+    <Folder Include="Transfer\Resolvers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.3" />
+  </ItemGroup>
+</Project>
