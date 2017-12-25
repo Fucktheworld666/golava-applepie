@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -17,18 +18,25 @@ namespace GoLava.ApplePie.Transfer
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-        public RestClient()
+        private static HttpMessageHandler CreateHttpMessageHandlerPipeline()
         {
-            var pipeline = new HttpClientConsoleHandler
+            var pipeline = new HttpClientHandler
             {
-                InnerHandler = new HttpClientHandler
-                {
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                    UseCookies = false
-                }
-            };
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                UseCookies = false
+            }.DecorateWith(new HttpClientConsoleHandler());
+            return pipeline;
+        }
 
-            _httpClient = new HttpClient(pipeline);
+        public RestClient()
+            : this(CreateHttpMessageHandlerPipeline()) { }
+
+        public RestClient(HttpMessageHandler httpMessageHandler)
+        {
+            if (httpMessageHandler == null)
+                throw new ArgumentNullException(nameof(httpMessageHandler));
+            
+            _httpClient = new HttpClient(httpMessageHandler);
             _jsonSerializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CustomPropertyNamesContractResolver()
@@ -46,8 +54,6 @@ namespace GoLava.ApplePie.Transfer
 
             return restResponse;
         }
-
-
 
         private HttpRequestMessage CreateHttpRequestMessage(RestClientContext context, RestRequest restRequest)
         {

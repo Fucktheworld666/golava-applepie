@@ -16,7 +16,7 @@ namespace GoLava.ApplePie.Clients.Portal
         public PortalClient(IPortalUrlProvider urlProvider)
                 : base(urlProvider) { }
 
-        internal PortalClient(RestClient restClient, IPortalUrlProvider urlProvider)
+        public PortalClient(RestClient restClient, IPortalUrlProvider urlProvider)
             : base(restClient, urlProvider) { }
 
         public async Task<List<Team>> GetTeamsAsync(ClientContext context)
