@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 
 namespace GoLava.ApplePie.Transfer.Cookies
@@ -11,7 +12,19 @@ namespace GoLava.ApplePie.Transfer.Cookies
     public class CookieParser
     {
         /// <summary>
-        /// Parses multiple set-cookie header values into <see cref="Cookie"/> objects
+        /// Parses a set-cookie header values into <see cref="Cookie"/> object.
+        /// </summary>
+        /// <returns>The parsed <see cref="Cookie"/> object.</returns>
+        /// <param name="cookieHeader">A set-cookie header values to be parsed.</param>
+        public Cookie Parse(string cookieHeader)
+        {
+            if (cookieHeader == null)
+                throw new ArgumentNullException(nameof(cookieHeader));
+            return this.Parse(new string[] { cookieHeader }).Single();
+        }
+
+        /// <summary>
+        /// Parses multiple set-cookie header values into <see cref="Cookie"/> objects.
         /// </summary>
         /// <returns>The parsed <see cref="Cookie"/> objects.</returns>
         /// <param name="cookieHeaderValues">One or more set-cookie header values to be parsed.</param>
@@ -38,7 +51,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
                     switch (kv.Key.ToLowerInvariant())
                     {
                         case "expires":
-                            cookie.Expires = DateTime.Parse(kv.Value, CultureInfo.InvariantCulture);
+                            cookie.Expires = DateTime.Parse(kv.Value, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
                             break;
                         case "secure":
                             cookie.Secure = true;

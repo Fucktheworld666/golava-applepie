@@ -16,4 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\GoLava.ApplePie\GoLava.ApplePie.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Transfer\" />
+    <Folder Include="Transfer\Cookies\" />
+  </ItemGroup>
 </Project>
