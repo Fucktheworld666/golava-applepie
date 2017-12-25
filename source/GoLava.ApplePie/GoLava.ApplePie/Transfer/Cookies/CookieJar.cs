@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,17 +7,28 @@ using System.Text;
 
 namespace GoLava.ApplePie.Transfer.Cookies
 {
+    /// <summary>
+    /// A container to store <see cref="T:Cookie"/> objects associated with <see cref="T:Uri"/>s.
+    /// </summary>
     public class CookieJar
     {
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>> _store;
         private readonly CookieParser _cookieParser;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:CookieJar"/> class.
+        /// </summary>
         public CookieJar()
         {
             _store = new ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>>(StringComparer.OrdinalIgnoreCase);
             _cookieParser = new CookieParser();
         }
 
+        /// <summary>
+        /// Adds a <see cref="T:Cookie"/> instance to the <see cref="T:CookieJar"/> for a particular <see cref="T:Uri"/>.
+        /// </summary>
+        /// <param name="uri">The <see cref="T:Uri"/> of the <see cref="T:Cookie"/> to be added to the <see cref="T:CookieJar"/>.</param>
+        /// <param name="cookie">The <see cref="T:Cookie"/> to be added to the <see cref="T:CookieJar"/>.</param>
         public void Add(Uri uri, Cookie cookie)
         {
             if (uri == null)
@@ -31,6 +41,12 @@ namespace GoLava.ApplePie.Transfer.Cookies
             cookies.AddOrUpdate(cookie.Name, cookie, (k, c) => cookie);
         }
 
+        /// <summary>
+        /// Adds a one or more <see cref="T:Cookie"/> instances, represented as set-cookie header strings, 
+        /// to the <see cref="T:CookieJar"/> for a particular <see cref="T:Uri"/>.
+        /// </summary>
+        /// <param name="uri">The <see cref="T:Uri"/> of the <see cref="T:Cookie"/> to be added to the <see cref="T:CookieJar"/>.</param>
+        /// <param name="cookieHeaderValues">One or more set-cookie header to be parsed and added as <see cref="T:Cookie"/> to the <see cref="T:CookieJar"/>.</param>
         public void Add(Uri uri, IEnumerable<string> cookieHeaderValues)
         {
             if (uri == null)
@@ -42,11 +58,19 @@ namespace GoLava.ApplePie.Transfer.Cookies
                 this.Add(uri, cookie);
         }
 
+        /// <summary>
+        /// Removes all <see cref="T:Cookie"/> instances from the <see cref="T:CookieJar"/>.
+        /// </summary>
         public void Clear()
         {
             _store.Clear();
         }
 
+        /// <summary>
+        /// Gets a <see cref="T:CookieCollection"/> that contains the <see cref="T:Cookie"/> instances that are associated with a specific <see cref="T:Uri"/>.
+        /// </summary>
+        /// <returns>A <see cref="T:CookieCollection"/> that contains the <see cref="T:Cookie"/> instances that are associated with a specific <see cref="T:Uri"/>.</returns>
+        /// <param name="uri">The <see cref="T:Uri"/> of the Cookie instances desired.</param>
         public CookieCollection GetCookies(Uri uri)
         {
             if (uri == null)
@@ -64,6 +88,12 @@ namespace GoLava.ApplePie.Transfer.Cookies
             return collection;
         }
 
+        /// <summary>
+        /// Gets the HTTP request cookie header that contains the HTTP cookies that represent 
+        /// the <see cref="T:Cookie"/> instances that are associated with a specific <see cref="T:Uri"/>.
+        /// </summary>
+        /// <returns>A HTTP request cookie header, with strings representing <see cref="T:Cookie"/> instances delimited by semicolons.</returns>
+        /// <param name="uri">URI.</param>
         public string GetRequestHeaderValue(Uri uri)
         {
             var sb = new StringBuilder();

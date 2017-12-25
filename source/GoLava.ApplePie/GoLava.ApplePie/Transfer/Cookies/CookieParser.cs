@@ -5,8 +5,16 @@ using System.Net;
 
 namespace GoLava.ApplePie.Transfer.Cookies
 {
+    /// <summary>
+    /// A cookie parser.
+    /// </summary>
     public class CookieParser
     {
+        /// <summary>
+        /// Parses multiple set-cookie header values into <see cref="Cookie"/> objects
+        /// </summary>
+        /// <returns>The parsed <see cref="Cookie"/> objects.</returns>
+        /// <param name="cookieHeaderValues">One or more set-cookie header values to be parsed.</param>
         public IEnumerable<Cookie> Parse(IEnumerable<string> cookieHeaderValues)
         {
             if (cookieHeaderValues == null)
@@ -51,7 +59,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
             }
         }
 
-        public static KeyValuePair<string, string> GetKeyValue(string segment)
+        private static KeyValuePair<string, string> GetKeyValue(string segment)
         {
             var idx = segment.IndexOf('=');
             return idx < 0 
