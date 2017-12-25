@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GoLava.ApplePie.Contracts;
+using GoLava.ApplePie.Contracts.Attributes;
 using GoLava.ApplePie.Contracts.Portal;
+using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
 
@@ -57,6 +60,59 @@ namespace GoLava.ApplePie.Clients.Portal
             return result.Data;
         }
 
+        public async Task<bool> DisableDeviceAsync(ClientContext context, string teamId, Device device, string platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.DeleteDeviceUrl, new { platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", teamId },
+                { "deviceId", device.DeviceId }
+            });
+            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new Null(CsrfClass.Device));
+            var response = await this.SendAsync<Result>(context, request);
+            this.CheckResultForErrors(response.Content);
+            context.DeleteValue<PageResult<Device>>(teamId);
+            return true;
+        }
+
+        public async Task<Device> EnableDeviceAsync(ClientContext context, string teamId, Device device, string platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.EnableDeviceUrl, new { platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", teamId },
+                { "deviceId", string.Empty },
+                { "displayId", device.DeviceId },
+                { "deviceNumber", device.DeviceNumber }
+            });
+            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new Null(CsrfClass.Device));
+            var response = await this.SendAsync<Result<Device>>(context, request);
+            this.CheckResultForErrors(response.Content);
+            context.DeleteValue<PageResult<Device>>(teamId);
+            return response.Content.Data;
+        }
+
+        public async Task<Device> ChangeDeviceNameAsync(ClientContext context, string teamId, Device device, string newName, string platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.UpdateDeviceUrl, new { platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", teamId },
+            });
+            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new UpdateDevice {
+                DeviceId = device.DeviceId,
+                DeviceNumber = device.DeviceNumber,
+                Name = newName
+            });
+            var response = await this.SendAsync<Result<Device>>(context, request);
+            this.CheckResultForErrors(response.Content);
+            context.DeleteValue<PageResult<Device>>(teamId);
+            return response.Content.Data;
+        }
+
         private async Task<Result<List<Device>>> AddDevicesAsync(ClientContext context, string teamId, NewDevices newDevices, string platform)
         {
             await Configure.AwaitFalse();
@@ -67,6 +123,7 @@ namespace GoLava.ApplePie.Clients.Portal
             });
             var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, newDevices);
             var response = await this.SendAsync<Result<List<Device>>>(context, request);
+            this.CheckResultForErrors(response.Content);
             context.DeleteValue<PageResult<Device>>(teamId);
             return response.Content;
         }
@@ -120,16 +177,34 @@ namespace GoLava.ApplePie.Clients.Portal
 
                 var response = await this.SendAsync<TPageResult>(context, request);
                 var page = response.Content;
+                this.CheckResultForErrors(page);
+
+                var recordsCount = page.RecordsCount;
+                if (recordsCount <= 0)
+                    break;
+                count += recordsCount;
 
                 pages.Add(page);
 
                 total = Math.Max(total, page.TotalRecords);
-                count += page.RecordsCount;
+
                 pageNumber++;
             } 
             while (count < total);
 
             return pages;
+        }
+
+        private void CheckResultForErrors(Result result)
+        {
+            if (!string.IsNullOrEmpty(result.UserString))
+                throw new ApplePieException(result.UserString);
+
+            if (result.ValidationMessages != null && result.ValidationMessages.Count > 0)
+            {
+                var validationMessage = result.ValidationMessages.First();
+                throw new ApplePieException(validationMessage.ValidationUserMessage);
+            }
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using GoLava.ApplePie.Contracts.Attributes;
 
 namespace GoLava.ApplePie.Contracts.Portal
 {
+    [CsrfClass(CsrfClass.Device)]
     public class NewDevices
     {
         public List<string> DeviceNumbers { get; set; }

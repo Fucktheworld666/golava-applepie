@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Reflection;
 using GoLava.ApplePie.Contracts.Attributes;
@@ -16,7 +17,9 @@ namespace GoLava.ApplePie.Transfer.Resolvers
             {
                 var type = jsonProperty.PropertyType;
                 var attribute = FindJsonDataClassPropertyAttribute(type, out Type outType);
-                jsonProperty.PropertyName = Pluralize(attribute?.Name ?? (outType ?? type).Name);
+                var name = attribute?.Name ?? (outType ?? type).Name;
+                jsonProperty.PropertyName = typeof(IEnumerable).IsAssignableFrom(type)
+                    ? Pluralize(name) : name;
             }
             return jsonProperty;
         }

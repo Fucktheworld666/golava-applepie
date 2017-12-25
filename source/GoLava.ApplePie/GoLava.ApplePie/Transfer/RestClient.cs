@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using GoLava.ApplePie.Contracts;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer.Content;
 using GoLava.ApplePie.Transfer.Handlers;
@@ -121,20 +122,30 @@ namespace GoLava.ApplePie.Transfer
             if (restRequest.Method != HttpMethod.Post && restRequest.Method != HttpMethod.Put)
                 return null;
 
+            var content = restRequest.Content;
+            if (content is Null)
+                content = null;
+
+            HttpContent httpContent;
             switch (restRequest.ContentType)
             {
                 case RestContentType.Json:
-                    var json = JsonConvert.SerializeObject(restRequest.Content, _jsonSerializerSettings);
-                    var jsonContent = new StringContent(json, restRequest.ContentEncoding, "application/json");
+                    var json = JsonConvert.SerializeObject(content, _jsonSerializerSettings);
+                    httpContent = new StringContent(json, restRequest.ContentEncoding, "application/json");
                     if (restRequest.ContentEncoding == null)
-                        jsonContent.Headers.ContentType.CharSet = null;
-                    jsonContent.Headers.ContentLength = json.Length;
-                    return jsonContent;
+                        httpContent.Headers.ContentType.CharSet = null;
+                    httpContent.Headers.ContentLength = json.Length;
+                    break;
                 case RestContentType.FormUrlEncoded:
-                    return new CustomFormUrlEncodedContent(restRequest.Content);
+                    httpContent = new CustomFormUrlEncodedContent(content);
+                    break;
                 default:
-                    return new NullContent();
+                    httpContent = new NullContent();
+                    break;
             }
+            if (httpContent.Headers.ContentLength == null)
+                httpContent.Headers.ContentLength = 0;
+            return httpContent;
         }
     }
 }

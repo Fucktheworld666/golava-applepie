@@ -126,14 +126,14 @@ namespace GoLava.ApplePie.Clients
 
             if (request.Headers == null)
                 request.Headers = new RestHeaders();
-            request.Headers.Add("Accept", "application/json", "text/javascript");
-            request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+            request.Headers.Set("Accept", "application/json", "text/javascript");
+            request.Headers.Set("X-Requested-With", "XMLHttpRequest");
 
-            var csrfClass = FindCsrfClass(typeof(TContent));
+            var csrfClass = request.Content is Null n ? n.CsrfClass : FindCsrfClass(typeof(TContent));
             if (context.TryGetValue(out CsrfToken csrfToken, csrfClass))
             {
-                request.Headers.Add("csrf", csrfToken.Value);
-                request.Headers.Add("csrf_ts", csrfToken.Timestamp);
+                request.Headers.Set("csrf", csrfToken.Value);
+                request.Headers.Set("csrf_ts", csrfToken.Timestamp);
             }
 
             var response = await this.RestClient.SendAsync<TContent>(context, request);

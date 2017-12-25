@@ -34,6 +34,23 @@ namespace GoLava.ApplePie.App
 
                     var addedDevices = await client.AddDeviceAsync(context, team.TeamId, "1111111111111111111111111111111111111112", "test", Contracts.Portal.DeviceClass.iPhone);
                     Console.WriteLine("Team {0}: added devices count: {1}", team.TeamId, addedDevices.Count);
+
+                    var newDevice = addedDevices[0];
+
+                    var successfulDisabled = await client.DisableDeviceAsync(context, team.TeamId, newDevice);
+                    if (successfulDisabled) 
+                    {
+                        Console.WriteLine("Successfully disabled device.");
+                        var enabledDevice = await client.EnableDeviceAsync(context, team.TeamId, newDevice);
+                        if (enabledDevice != null)
+                            Console.WriteLine("Successfully enabled device.");
+
+                        await client.DisableDeviceAsync(context, team.TeamId, newDevice);
+
+                        var changedDevice = await client.ChangeDeviceNameAsync(context, team.TeamId, newDevice, "foobar");
+                        if (changedDevice != null)
+                            Console.WriteLine("Successfully changed device name to {0}.", changedDevice.Name);
+                    }
                 }
             }
         }

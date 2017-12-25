@@ -6,9 +6,19 @@
 
         public const string BaseUrl = "https://developer.apple.com/services-account/" + ProtocolVersion + "/account/";
 
-        public string DevicesUrl => BaseUrl + "{platform}/device/listDevices.action";
+        public const string PlatformBaseUrl = BaseUrl + "{platform}/";
 
-        public string AddDevicesUrl => BaseUrl + "{platform}/device/addDevices.action";
+        public const string DeviceBaseUrl = PlatformBaseUrl + "device/";
+
+        public string DevicesUrl => DeviceBaseUrl + "listDevices.action";
+
+        public string AddDevicesUrl => DeviceBaseUrl + "addDevices.action";
+
+        public string DeleteDeviceUrl => DeviceBaseUrl + "deleteDevice.action";
+
+        public string EnableDeviceUrl => DeviceBaseUrl + "enableDevice.action";
+
+        public string UpdateDeviceUrl => DeviceBaseUrl + "updateDevice.action";
 
         public string TeamsUrl => BaseUrl + "getTeams";
 

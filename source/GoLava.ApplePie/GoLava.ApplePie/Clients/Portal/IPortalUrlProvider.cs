@@ -6,6 +6,12 @@
 
         string AddDevicesUrl { get; }
 
+        string DeleteDeviceUrl { get; }
+
+        string EnableDeviceUrl { get; }
+
+        string UpdateDeviceUrl { get; }
+
         string TeamsUrl { get; }
 
         string TeamMembersUrl { get; }

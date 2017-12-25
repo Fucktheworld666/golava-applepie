@@ -38,5 +38,17 @@ namespace GoLava.ApplePie.Transfer
             foreach (var value in values)
                 hashSet.Add(value);
         }
+
+        public void Set(string key, string value)
+        {
+            this.Remove(key);
+            this.Add(key, value);
+        }
+
+        public void Set(string key, params string[] value)
+        {
+            this.Remove(key);
+            this.Add(key, value);
+        }
     }
 }
