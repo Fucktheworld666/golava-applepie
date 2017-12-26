@@ -5,10 +5,16 @@ using System.Threading.Tasks;
 
 namespace GoLava.ApplePie.Transfer.Content
 {
+    /// <summary>
+    /// A <see cref="T:HttpContent"/> that has no data and a content length of 0
+    /// </summary>
     public class NullContent : HttpContent
     {
         private static Task Empty = Task.FromResult<object>(null);
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:.NullContent"/> class.
+        /// </summary>
         public NullContent()
         {
             this.Headers.ContentLength = 0;

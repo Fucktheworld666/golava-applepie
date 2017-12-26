@@ -21,5 +21,6 @@
     <Folder Include="Transfer\Cookies\" />
     <Folder Include="Formatting\" />
     <Folder Include="Handlers\" />
+    <Folder Include="Transfer\Content\" />
   </ItemGroup>
 </Project>
