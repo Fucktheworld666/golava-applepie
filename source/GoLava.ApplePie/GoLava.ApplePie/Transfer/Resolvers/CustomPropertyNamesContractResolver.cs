@@ -8,6 +8,10 @@ using Newtonsoft.Json.Serialization;
 
 namespace GoLava.ApplePie.Transfer.Resolvers
 {
+    /// <summary>
+    /// A custom property names contract resolver that 
+    /// uses a <see cref="T:CamelCasePropertyNamesContractResolver"/> as a base class.
+    /// </summary>
     public class CustomPropertyNamesContractResolver : CamelCasePropertyNamesContractResolver
     {
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
@@ -17,8 +21,18 @@ namespace GoLava.ApplePie.Transfer.Resolvers
             {
                 var type = jsonProperty.PropertyType;
                 var attribute = FindJsonDataClassPropertyAttribute(type, out Type outType);
+                if (outType == null && attribute == null)
+                {
+                    outType = type;
+                    while (outType.IsGenericType || outType.IsArray)
+                    {
+                        outType = outType.IsGenericType 
+                            ? outType.GenericTypeArguments[0] 
+                            : outType.GetElementType();
+                    }
+                }
                 var name = attribute?.Name ?? (outType ?? type).Name;
-                jsonProperty.PropertyName = typeof(IEnumerable).IsAssignableFrom(type)
+                jsonProperty.PropertyName = typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string)
                     ? Pluralize(name) : name;
             }
             return jsonProperty;
