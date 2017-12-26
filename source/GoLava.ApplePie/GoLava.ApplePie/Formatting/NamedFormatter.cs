@@ -8,12 +8,18 @@ using System.Text.RegularExpressions;
 
 namespace GoLava.ApplePie.Formatting
 {
+    /// <summary>
+    /// A formatter for named parameters within strings.
+    /// </summary>
     public class NamedFormatter
     {
-        private static readonly Regex RegexFormatArgs = new Regex(@"([^{]|^){(\w+)}([^}]|$)|([^{]|^){(\w+)\:(.+)}([^}]|$)", RegexOptions.Compiled);
-        private static readonly Regex RegexFormatPlaceHolder = new Regex(@"(?<=[^\{]\{)[^{}]+?(?=:|\})", RegexOptions.Compiled);
+        private static readonly Regex RegexFormatPlaceHolder = new Regex(@"(?<=[^\{]\{|\{)[^{}]+?(?=:|\})", RegexOptions.Compiled);
         private readonly ConcurrentDictionary<string, Func<object, string>> _preCompiledExpressions;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:NamedFormatter"/> class.
+        /// </summary>
+        /// <param name="preCompiledExpressions">A collection of precompiled expressions.</param>
         public NamedFormatter(ConcurrentDictionary<string, Func<object, string>> preCompiledExpressions = null)
         {
             _preCompiledExpressions = preCompiledExpressions
@@ -21,11 +27,16 @@ namespace GoLava.ApplePie.Formatting
         }
 
         /// <summary>
-        /// Formats the specified pattern.
+        /// Formats a string by replacing placeholders with a string pattern with the value of properties of the
+        /// given item with the same name. 
         /// </summary>
-        /// <param name="pattern">The pattern.</param>
-        /// <param name="item">The item.</param>
-        /// <returns></returns>
+        /// <param name="pattern">The pattern the holds the placeholders to be replaced.</param>
+        /// <param name="item">The object that has properties matching the placeholders of the pattern.</param>
+        /// <returns>A string that is the result of applying the item with the given pattern.</returns>
+        /// <example>
+        /// var result = namedFormatter.Format("Hello {name}!", new { name = "World" });
+        /// // result has a value of "Hello World!"
+        /// </example>
         public string Format(string pattern, object item)
         {
             if (item == null)
