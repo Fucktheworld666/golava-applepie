@@ -197,9 +197,9 @@ namespace GoLava.ApplePie.Clients
 
         private CsrfToken GetCsrfToken<TContent>(RestResponse<TContent> response, CsrfClass csrfClass)
         {
-            if (!response.Headers.TryGetValue("csrf", out HashSet<string> csrfValues) || csrfValues.Count != 1)
+            if (!response.Headers.TryGetValue("csrf", out ISet<string> csrfValues) || csrfValues.Count != 1)
                 return null;
-            if (!response.Headers.TryGetValue("csrf_ts", out HashSet<string> csrfTsValues) || csrfTsValues.Count != 1)
+            if (!response.Headers.TryGetValue("csrf_ts", out ISet<string> csrfTsValues) || csrfTsValues.Count != 1)
                 return null;
 
             var csrfToken = new CsrfToken
