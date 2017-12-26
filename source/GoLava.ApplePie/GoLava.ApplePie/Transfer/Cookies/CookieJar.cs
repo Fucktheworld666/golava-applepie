@@ -97,7 +97,9 @@ namespace GoLava.ApplePie.Transfer.Cookies
         public string GetRequestHeaderValue(Uri uri)
         {
             var sb = new StringBuilder();
-            foreach (var cookie in this.GetCookies(uri).Cast<Cookie>().OrderBy(c => c.Name))
+            foreach (var cookie in this.GetCookies(uri).Cast<Cookie>()
+                     .Where(c => !string.IsNullOrWhiteSpace(c.Name))
+                     .OrderBy(c => c.Name))
             {
                 if (sb.Length > 0)
                     sb.Append("; ");
