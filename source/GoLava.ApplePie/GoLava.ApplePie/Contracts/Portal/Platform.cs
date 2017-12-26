@@ -5,5 +5,7 @@
         public const string Ios = "ios";
 
         public const string Mac = "mac";
+
+        public const string Safari = "safari";
     }
 }
