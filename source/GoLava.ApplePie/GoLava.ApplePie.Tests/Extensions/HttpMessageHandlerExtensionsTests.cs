@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net.Http;
-using GoLava.ApplePie.Transfer.Handlers;
+using GoLava.ApplePie.Extensions;
 using Xunit;
 
-namespace GoLava.ApplePie.Tests.Handlers
+namespace GoLava.ApplePie.Tests.Extensions
 {
     public class HttpMessageHandlerExtensionsTests
     {

@@ -1,5 +1,4 @@
-﻿using System;
-namespace GoLava.ApplePie.Clients
+﻿namespace GoLava.ApplePie.Clients
 {
     public abstract class UrlProviderBase : IUrlProvider
     {

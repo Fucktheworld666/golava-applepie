@@ -1,5 +1,4 @@
-﻿using System;
-namespace GoLava.ApplePie.Contracts.Portal
+﻿namespace GoLava.ApplePie.Contracts.Portal
 {
     public class Address
     {

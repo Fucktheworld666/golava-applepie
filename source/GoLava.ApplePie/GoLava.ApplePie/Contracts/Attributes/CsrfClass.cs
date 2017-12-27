@@ -1,5 +1,4 @@
-﻿using System;
-namespace GoLava.ApplePie.Contracts.Attributes
+﻿namespace GoLava.ApplePie.Contracts.Attributes
 {
     public enum CsrfClass
     {

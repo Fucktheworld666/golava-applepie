@@ -1,11 +1,14 @@
-﻿namespace GoLava.ApplePie.Contracts.Portal
+﻿using System.ComponentModel;
+
+namespace GoLava.ApplePie.Contracts.Portal
 {
-    public static class Platform
+    public enum Platform
     {
-        public const string Ios = "ios";
-
-        public const string Mac = "mac";
-
-        public const string Safari = "safari";
+        [Description("ios")]
+        Ios,
+        [Description("mac")]
+        Mac,
+        [Description("safari")]
+        Safari
     }
 }

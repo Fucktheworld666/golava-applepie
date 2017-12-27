@@ -20,7 +20,7 @@
     <Folder Include="Transfer\" />
     <Folder Include="Transfer\Cookies\" />
     <Folder Include="Formatting\" />
-    <Folder Include="Handlers\" />
+    <Folder Include="Extensions\" />
     <Folder Include="Transfer\Content\" />
     <Folder Include="Transfer\Resolvers\" />
   </ItemGroup>

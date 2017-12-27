@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using GoLava.ApplePie.Formatting;
 using Xunit;
 
@@ -61,6 +62,43 @@ namespace GoLava.ApplePie.Tests.Formatting
             var result = namedFormatter.Format("{one} {two} {three} {two} {one}", new { 
                 one = 1, two = "zwei", three = 3.3333 });
             Assert.Equal("1 zwei 3.3333 zwei 1", result);
+        }
+
+        [Fact]
+        public void FormatRemovesPlaceHolderThatDoesNotExist()
+        {
+            var namedFormatter = new NamedFormatter();
+            var result = namedFormatter.Format("Hello {name}!", new { name2 = 42.1d });
+            Assert.Equal("Hello !", result);
+        }
+
+        [Fact]
+        public void FormatEnum()
+        {
+            var namedFormatter = new NamedFormatter();
+            var result = namedFormatter.Format("{x}", new
+            {
+                x = TestEnum.One,
+            });
+            Assert.Equal("One", result);
+        }
+
+        [Fact]
+        public void FormatEnumWithDescription()
+        {
+            var namedFormatter = new NamedFormatter();
+            var result = namedFormatter.Format("{x}", new
+            {
+                x = TestEnum.Two,
+            });
+            Assert.Equal("zwei", result);
+        }
+
+        public enum TestEnum
+        {
+            One,
+            [Description("zwei")]
+            Two
         }
     }
 }

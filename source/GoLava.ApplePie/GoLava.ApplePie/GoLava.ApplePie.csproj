@@ -19,6 +19,7 @@
     <Folder Include="Contracts\Converters\" />
     <Folder Include="Contracts\Attributes\" />
     <Folder Include="Transfer\Resolvers\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

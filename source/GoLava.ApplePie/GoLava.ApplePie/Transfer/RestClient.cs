@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Contracts;
+using GoLava.ApplePie.Extensions;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer.Content;
 using GoLava.ApplePie.Transfer.Handlers;

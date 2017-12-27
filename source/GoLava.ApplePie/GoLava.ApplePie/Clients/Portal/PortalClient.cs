@@ -34,7 +34,7 @@ namespace GoLava.ApplePie.Clients.Portal
             return teams;
         }
 
-        public async Task<List<Device>> GetDevicesAsync(ClientContext context, string teamId, string platform = Platform.Ios)
+        public async Task<List<Device>> GetDevicesAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
@@ -46,7 +46,7 @@ namespace GoLava.ApplePie.Clients.Portal
             return devicesResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
         }
 
-        public async Task<List<Device>> AddDeviceAsync(ClientContext context, string teamId, string uiid, string name, DeviceClass deviceClass, string platform = Platform.Ios)
+        public async Task<List<Device>> AddDeviceAsync(ClientContext context, string teamId, string uiid, string name, DeviceClass deviceClass, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
@@ -60,7 +60,7 @@ namespace GoLava.ApplePie.Clients.Portal
             return result.Data;
         }
 
-        public async Task<bool> DisableDeviceAsync(ClientContext context, string teamId, Device device, string platform = Platform.Ios)
+        public async Task<bool> DisableDeviceAsync(ClientContext context, string teamId, Device device, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
@@ -76,7 +76,7 @@ namespace GoLava.ApplePie.Clients.Portal
             return true;
         }
 
-        public async Task<Device> EnableDeviceAsync(ClientContext context, string teamId, Device device, string platform = Platform.Ios)
+        public async Task<Device> EnableDeviceAsync(ClientContext context, string teamId, Device device, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
@@ -94,7 +94,7 @@ namespace GoLava.ApplePie.Clients.Portal
             return response.Content.Data;
         }
 
-        public async Task<Device> ChangeDeviceNameAsync(ClientContext context, string teamId, Device device, string newName, string platform = Platform.Ios)
+        public async Task<Device> ChangeDeviceNameAsync(ClientContext context, string teamId, Device device, string newName, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
@@ -113,7 +113,7 @@ namespace GoLava.ApplePie.Clients.Portal
             return response.Content.Data;
         }
 
-        private async Task<Result<List<Device>>> AddDevicesAsync(ClientContext context, string teamId, NewDevices newDevices, string platform)
+        private async Task<Result<List<Device>>> AddDevicesAsync(ClientContext context, string teamId, NewDevices newDevices, Platform platform)
         {
             await Configure.AwaitFalse();
 
@@ -128,7 +128,7 @@ namespace GoLava.ApplePie.Clients.Portal
             return response.Content;
         }
 
-        private async Task<List<PageResult<Device>>> GetDevicesResultsAsync(ClientContext context, string teamId, string platform)
+        private async Task<List<PageResult<Device>>> GetDevicesResultsAsync(ClientContext context, string teamId, Platform platform)
         {
             await Configure.AwaitFalse();
 

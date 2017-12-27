@@ -3,8 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using GoLava.ApplePie.Extensions;
 
 namespace GoLava.ApplePie.Formatting
 {
@@ -14,6 +16,8 @@ namespace GoLava.ApplePie.Formatting
     public class NamedFormatter
     {
         private static readonly Regex RegexFormatPlaceHolder = new Regex(@"(?<=[^\{]\{|\{)[^{}]+?(?=:|\})", RegexOptions.Compiled);
+        private static readonly MethodInfo FormatMethod = typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object[]) });
+        private static readonly MethodInfo ConvertMethod = typeof(NamedFormatter).GetMethod("Convert", BindingFlags.NonPublic | BindingFlags.Static);
         private readonly ConcurrentDictionary<string, Func<object, string>> _preCompiledExpressions;
 
         /// <summary>
@@ -42,19 +46,20 @@ namespace GoLava.ApplePie.Formatting
             if (item == null)
                 return pattern;
 
-            if (_preCompiledExpressions.TryGetValue(pattern, out Func<object, string> func) && func != null)
+            var inputType = item.GetType();
+            var lookupKey = pattern + inputType.FullName;
+
+            if (_preCompiledExpressions.TryGetValue(lookupKey, out Func<object, string> func) && func != null)
                 return func(item);
             
-            var inputType = item.GetType();
             var arguments = ParsePattern(pattern, out string replacedPattern, item);
-            var formatMethod = typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object[]) });
 
             var patternExpression = Expression.Constant(replacedPattern, typeof(string));
             var parameterExpression = Expression.Parameter(typeof(object));
             var convertedInput = Expression.Convert(parameterExpression, inputType);
-            var argumentArrayElements = arguments.Select(argument => Expression.Convert(Expression.PropertyOrField(convertedInput, argument), typeof(object)));
+            var argumentArrayElements = arguments.Select(argument => Expression.Call(null, ConvertMethod, Expression.Convert(Expression.PropertyOrField(convertedInput, argument), typeof(object))));
             var argumentArrayExpressions = Expression.NewArrayInit(typeof(object), argumentArrayElements);
-            var formatCallExpression = Expression.Call(formatMethod, patternExpression, argumentArrayExpressions);
+            var formatCallExpression = Expression.Call(FormatMethod, patternExpression, argumentArrayExpressions);
             var lambdaExpression = Expression.Lambda<Func<object, string>>(formatCallExpression, parameterExpression);
 
             // The lambda expression will look something like this input => string.Format("my format
@@ -62,9 +67,16 @@ namespace GoLava.ApplePie.Formatting
 
             func = lambdaExpression.Compile();
 
-            _preCompiledExpressions.TryAdd(pattern, func);
+            _preCompiledExpressions.TryAdd(lookupKey, func);
 
             return func(item);
+        }
+
+        private static object Convert(object o)
+        {
+            if (o is Enum e)
+                return e.ToDescriptionString();
+            return o;
         }
 
         private static IEnumerable<string> ParsePattern(string pattern, out string replacedPattern, object item)
@@ -79,23 +91,28 @@ namespace GoLava.ApplePie.Formatting
             {
                 var key = match.Value;
                 var property = itemType.GetProperty(key);
-                var lowerKey = key.ToLowerInvariant();
-                var index = lowerArguments.IndexOf(lowerKey);
-                if (index < 0)
+                if (property != null)
                 {
-                    index = lowerArguments.Count;
-                    lowerArguments.Add(lowerKey);
-                    arguments.Add(key);
-                }
+                    var lowerKey = key.ToLowerInvariant();
+                    var index = lowerArguments.IndexOf(lowerKey);
+                    if (index < 0)
+                    {
+                        index = lowerArguments.Count;
+                        lowerArguments.Add(lowerKey);
+                        arguments.Add(key);
+                    }
 
-                sb.Append(pattern.Substring(lastIndex, match.Index - lastIndex));
-                sb.Append(index);
-                if (property != null && property.PropertyType == typeof(DateTime))
+                    sb.Append(pattern.Substring(lastIndex, match.Index - lastIndex));
+                    sb.Append(index);
+                    if (property.PropertyType == typeof(DateTime))
+                        sb.Append(":o");
+                    lastIndex = match.Index + match.Length;
+                } 
+                else 
                 {
-                    sb.Append(":o");
+                    sb.Append(pattern.Substring(lastIndex, match.Index - lastIndex - 1));
+                    lastIndex = match.Index + match.Length + 1;
                 }
-
-                lastIndex = match.Index + match.Length;
             }
 
             sb.Append(pattern.Substring(lastIndex));

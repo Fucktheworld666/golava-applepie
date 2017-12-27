@@ -1,7 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
-
-namespace GoLava.ApplePie.Contracts.Portal
+﻿namespace GoLava.ApplePie.Contracts.Portal
 {
     public class MemberShip
     {

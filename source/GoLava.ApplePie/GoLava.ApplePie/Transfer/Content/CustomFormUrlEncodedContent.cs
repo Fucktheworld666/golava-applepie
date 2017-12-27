@@ -3,10 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Net.Http;
 using System.Text;
-using System.ComponentModel;
+using GoLava.ApplePie.Extensions;
 using GoLava.ApplePie.Transfer.Resolvers;
 
 namespace GoLava.ApplePie.Transfer.Content
@@ -59,7 +58,7 @@ namespace GoLava.ApplePie.Transfer.Content
                 return l.ToString(CultureInfo.InvariantCulture);
 
             if (value is Enum e)
-                return GetEnumDescription(e);
+                return e.ToDescriptionString();
             
             if (value is IEnumerable collection)
             {
@@ -74,13 +73,6 @@ namespace GoLava.ApplePie.Transfer.Content
             }
 
             return value.ToString();
-        }
-
-        public static string GetEnumDescription(Enum value)
-        {
-            var fieldInfo = value.GetType().GetField(value.ToString());
-            var attribute = fieldInfo.GetCustomAttribute<DescriptionAttribute>();
-            return attribute != null ? attribute.Description : value.ToString();
         }
     }
 }

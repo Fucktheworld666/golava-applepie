@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 
-namespace GoLava.ApplePie.Transfer.Handlers
+namespace GoLava.ApplePie.Extensions
 {
     /// <summary>
     /// Http message handler extensions.
