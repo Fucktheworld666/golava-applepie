@@ -33,9 +33,6 @@ namespace GoLava.ApplePie.Threading
         public void OnCompleted(Action continuation)
         {
             var prev = SynchronizationContext.Current;
-            if (prev == null)
-                return;
-
             try
             {
                 SynchronizationContext.SetSynchronizationContext(null);

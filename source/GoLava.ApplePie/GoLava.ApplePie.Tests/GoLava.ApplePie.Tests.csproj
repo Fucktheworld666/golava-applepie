@@ -23,5 +23,6 @@
     <Folder Include="Extensions\" />
     <Folder Include="Transfer\Content\" />
     <Folder Include="Transfer\Resolvers\" />
+    <Folder Include="Threading\" />
   </ItemGroup>
 </Project>
