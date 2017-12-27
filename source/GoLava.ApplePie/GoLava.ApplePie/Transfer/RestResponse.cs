@@ -7,6 +7,8 @@ namespace GoLava.ApplePie.Transfer
     /// </summary>
     public class RestResponse<TContent>
     {
+        public RestResponse() => this.StatusCode = 0;
+
         /// <summary>
         /// Gets a value indicating whether rest call was successful.
         /// </summary>
