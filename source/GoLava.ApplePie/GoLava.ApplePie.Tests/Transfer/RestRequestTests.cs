@@ -116,5 +116,50 @@ namespace GoLava.ApplePie.Tests.Transfer
             var restRequest = RestRequest.Post(new RestUri("http://domain.ext"), RestContentType.Json, content);
             Assert.Equal(RestContentType.Json, restRequest.ContentType);
         }
+
+        [Fact]
+        public void PutSetsMethodToPut()
+        {
+            var restRequest = RestRequest.Put(new RestUri("http://domain.ext"));
+            Assert.Equal(HttpMethod.Put, restRequest.Method);
+        }
+
+        [Fact]
+        public void PutSetsUri()
+        {
+            var restRequest = RestRequest.Put(new RestUri("http://domain.ext"));
+            Assert.Equal("http://domain.ext/", restRequest.Uri.AbsoluteUri);
+        }
+
+        [Fact]
+        public void PutSetsContentEncodingToUtf8()
+        {
+            var restRequest = RestRequest.Put(new RestUri("http://domain.ext"));
+            Assert.Equal(Encoding.UTF8, restRequest.ContentEncoding);
+        }
+
+        [Fact]
+        public void PutSetsHeaders()
+        {
+            var headers = new RestHeaders();
+            var restRequest = RestRequest.Put(new RestUri("http://domain.ext"), headers);
+            Assert.Same(headers, restRequest.Headers);
+        }
+
+        [Fact]
+        public void PutSetsContent()
+        {
+            var content = new object();
+            var restRequest = RestRequest.Put(new RestUri("http://domain.ext"), RestContentType.Json, content);
+            Assert.Same(content, restRequest.Content);
+        }
+
+        [Fact]
+        public void PutSetsContentType()
+        {
+            var content = new object();
+            var restRequest = RestRequest.Put(new RestUri("http://domain.ext"), RestContentType.Json, content);
+            Assert.Equal(RestContentType.Json, restRequest.ContentType);
+        }
     }
 }

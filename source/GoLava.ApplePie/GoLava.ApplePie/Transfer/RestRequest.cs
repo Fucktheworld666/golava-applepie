@@ -52,6 +52,35 @@ namespace GoLava.ApplePie.Transfer
         };
 
         /// <summary>
+        /// Creates a PUT rest request.
+        /// </summary>
+        public static RestRequest Put(RestUri uri) => Put(uri, null);
+
+        /// <summary>
+        /// Creates a PUT rest request.
+        /// </summary>
+        public static RestRequest Put(RestUri uri, RestHeaders headers) => Put(uri, headers, RestContentType.None, null);
+
+        /// <summary>
+        /// Creates a PUT rest request.
+        /// </summary>
+        public static RestRequest Put(RestUri uri, RestContentType contentType, object content) => Put(uri, null, contentType, content);
+
+        /// <summary>
+        /// Creates a PUT rest request.
+        /// </summary>
+        public static RestRequest Put(RestUri uri, RestHeaders headers, RestContentType contentType, object content) => new RestRequest
+        {
+            Method = HttpMethod.Put,
+            Uri = uri,
+            Headers = headers,
+            ContentType = contentType,
+            Content = content,
+            ContentEncoding = Encoding.UTF8
+        };
+
+
+        /// <summary>
         /// Gets or sets the <see cref="T:HttpMethod"/> of the rest request.
         /// </summary>
         public HttpMethod Method { get; set; }
