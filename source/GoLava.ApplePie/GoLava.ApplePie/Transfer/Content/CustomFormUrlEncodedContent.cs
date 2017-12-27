@@ -10,8 +10,16 @@ using GoLava.ApplePie.Transfer.Resolvers;
 
 namespace GoLava.ApplePie.Transfer.Content
 {
+    /// <summary>
+    /// A custom container for name/value tuples encoded using application/x-www-form-urlencoded MIME type.
+    /// </summary>
     public class CustomFormUrlEncodedContent : FormUrlEncodedContent
     {
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:CustomFormUrlEncodedContent"/> class.
+        /// </summary>
+        /// <param name="content">Properties of this object will be used as name/value pairs..</param>
         public CustomFormUrlEncodedContent(object content)
             : base(Convert(content)) { }
 
