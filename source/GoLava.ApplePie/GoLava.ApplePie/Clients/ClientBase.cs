@@ -40,11 +40,7 @@ namespace GoLava.ApplePie.Clients
             var context = new ClientContext();
             try
             {
-                var logonAuth = await this.LogonWithCredentialsAsync(context, new Credentials
-                {
-                    AccountName = username,
-                    Password = password
-                });
+                var logonAuth = await this.LogonWithCredentialsAsync(context, username, password);
                 context.LogonAuth = logonAuth;
                 if (!logonAuth.IsTwoStepRequired)
                 {
@@ -128,7 +124,7 @@ namespace GoLava.ApplePie.Clients
             return new Uri(url);
         }
 
-        protected virtual async Task<LogonAuth> LogonWithCredentialsAsync(ClientContext context, Credentials credentials)
+        protected virtual async Task<LogonAuth> LogonWithCredentialsAsync(ClientContext context, string username, string password)
         {
             await Configure.AwaitFalse();
 
@@ -140,7 +136,11 @@ namespace GoLava.ApplePie.Clients
                 var request = RestRequest.Post(
                     new RestUri(this.UrlProvider.LogonUrl), 
                     this.GetAuthRequestHeaders(context), 
-                    RestContentType.Json, credentials);
+                    RestContentType.Json, new {
+                        accountName = username,
+                        password,
+                        rememberMe = true
+                    });
 
                 var response = await this.SendAsync<LogonAuth>(context, request);
                 return response.Content;
@@ -150,7 +150,7 @@ namespace GoLava.ApplePie.Clients
                 switch (apre.Response.StatusCode)
                 {
                     case HttpStatusCode.Forbidden:
-                        throw new ApplePieException($"Invalid account name and password combination. Used '{credentials.AccountName}' as the account name.", apre);
+                        throw new ApplePieException($"Invalid username and password combination. Used '{username}' as the username.", apre);
 
                     case HttpStatusCode.Conflict:
                         return await this.HandleTwoStepAuthenticationAsync(context, apre.Response);
