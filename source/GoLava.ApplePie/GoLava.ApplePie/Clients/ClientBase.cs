@@ -81,8 +81,12 @@ namespace GoLava.ApplePie.Clients
                 if (context.TryGetValue(out TrustedDevice trustedDevice))
                 {
                     var logonAuth = await this.LogonWithTwoStepCodeAsync(context, trustedDevice, code);
-                    context.Authentication = Authentication.Success;
                     context.LogonAuth = logonAuth;
+
+                    var session = await this.GetSessionAsync(context);
+                    context.Authentication = Authentication.Success;
+                    context.Session = session;
+
                     context.DeleteValue<TrustedDevice>();
                 }
                 else 
