@@ -1,4 +1,5 @@
-﻿using GoLava.ApplePie.Transfer;
+﻿using GoLava.ApplePie.Contracts;
+using GoLava.ApplePie.Transfer;
 
 namespace GoLava.ApplePie.Exceptions
 {
@@ -12,15 +13,21 @@ namespace GoLava.ApplePie.Exceptions
         /// </summary>
         /// <param name="message">The message that describes the exception.</param>
         /// <param name="response">The rest response received when the exception occured.</param>
-        public ApplePieRestException(string message, RestResponse<T> response)
+        public ApplePieRestException(string message, RestResponse<T> response, ErrorCode errorCode)
             : base(message)
         {
             this.Response = response;
+            this.ErrorCode = errorCode;
         }
 
         /// <summary>
         /// Gets the rest response.
         /// </summary>
         public RestResponse<T> Response { get; }
+
+        /// <summary>
+        /// Gets the error code that was extracted from the rest call.
+        /// </summary>
+        public ErrorCode ErrorCode { get; }
     }
 }

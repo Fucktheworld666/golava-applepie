@@ -19,7 +19,6 @@ namespace GoLava.ApplePie.Clients
         where TUrlProvider: IUrlProvider
     {
         private readonly NamedFormatter _namedFormatter;
-        private readonly JsonSerializerSettings _jsonSerializerSettings;
 
         protected ClientBase(TUrlProvider urlProvider)
             : this(new RestClient(), urlProvider) { }
@@ -27,10 +26,6 @@ namespace GoLava.ApplePie.Clients
         protected ClientBase(RestClient restClient, TUrlProvider urlProvider)
         {
             _namedFormatter = new NamedFormatter();
-            _jsonSerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
 
             this.RestClient = restClient;
             this.UrlProvider = urlProvider;
@@ -87,20 +82,45 @@ namespace GoLava.ApplePie.Clients
         {
             await Configure.AwaitFalse();
 
-            if (context.TryGetValue(out TrustedDevice trustedDevice))
+            try
             {
-                var logonAuth = await this.LogonWithTwoStepCodeAsync(context, trustedDevice, code);
-                context.Authentication = Authentication.Success;
-                context.LogonAuth = logonAuth;
-                context.DeleteValue<TrustedDevice>();
+                if (context.TryGetValue(out TrustedDevice trustedDevice))
+                {
+                    var logonAuth = await this.LogonWithTwoStepCodeAsync(context, trustedDevice, code);
+                    context.Authentication = Authentication.Success;
+                    context.LogonAuth = logonAuth;
+                    context.DeleteValue<TrustedDevice>();
+                }
+                else 
+                {
+                    var logonAuth = context.LogonAuth;
+                    context.Authentication = logonAuth != null && logonAuth.TrustedDevices != null && logonAuth.TrustedDevices.Count > 0 
+                        ? Authentication.TwoStepSelectTrustedDevice : Authentication.Failed;
+                }
+                return context;
             }
-            else 
+            catch (ApplePieRestException<LogonAuth> apre)
             {
-                var logonAuth = context.LogonAuth;
-                context.Authentication = logonAuth != null && logonAuth.TrustedDevices != null && logonAuth.TrustedDevices.Count > 0 
-                    ? Authentication.TwoStepSelectTrustedDevice : Authentication.Failed;
+                switch (apre.Response.StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        if (apre.ErrorCode == ErrorCode.IncorrectVerificationCode)
+                        {
+                            context.Authentication = Authentication.TwoStepCode;
+                            return context;
+                        }
+                        break;
+                }
+                throw;
             }
-            return context;
+            catch (ApplePieException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplePieException("Failed to verify two-step authentication. See inner exception for more details.", ex);
+            }
         }
 
         protected Uri CreateUri(string url, object urlArguments = null)
@@ -145,7 +165,7 @@ namespace GoLava.ApplePie.Clients
             }
             catch (Exception ex)
             {
-                throw new ApplePieException("Failed to logon.", ex);
+                throw new ApplePieException("Failed to logon. See inner exception for more details.", ex);
             }
         }
 
@@ -189,7 +209,7 @@ namespace GoLava.ApplePie.Clients
             }
             catch (Exception ex)
             {
-                throw new ApplePieException("Failed to get session.", ex);
+                throw new ApplePieException("Failed to get session. See inner exception for more details.", ex);
             }
         }
 
@@ -221,14 +241,22 @@ namespace GoLava.ApplePie.Clients
             // try to handle error
             var message = "Failed to send request.";
 
+            var errorCode = ErrorCode.Unknown;
             switch (response.ContentType)
             {
                 case RestContentType.Json:
-                    var error = JsonConvert.DeserializeObject<Error>(response.RawContent, _jsonSerializerSettings);
+                    var error = this.RestClient.Serializer.Deserialize<Error>(response.RawContent);
                     if (error.ServiceErrors != null && error.ServiceErrors.Count > 0)
                     {
-                        var serviceMessage = error.ServiceErrors.First();
-                        message = $"{serviceMessage.Message} ({serviceMessage.Code})";
+                        var serviceError = error.ServiceErrors.First();
+                        message = $"{serviceError.Message} ({serviceError.Code})";
+                        errorCode = new ErrorCode(serviceError.Code);
+                    }
+                    else if (error.ValidationErrors != null && error.ValidationErrors.Count > 0)
+                    {
+                        var validationError = error.ValidationErrors.First();
+                        message = $"{validationError.Message} ({validationError.Code})";
+                        errorCode = new ErrorCode(validationError.Code);
                     }
                     else if (!string.IsNullOrEmpty(error.UserString))
                     {
@@ -240,7 +268,7 @@ namespace GoLava.ApplePie.Clients
                     break;
             }
 
-            throw new ApplePieRestException<TContent>(message, response);
+            throw new ApplePieRestException<TContent>(message, response, errorCode);
         }
 
         private async Task<LogonAuth> HandleTwoStepAuthenticationAsync(

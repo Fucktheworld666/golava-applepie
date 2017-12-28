@@ -20,6 +20,7 @@
     <Folder Include="Contracts\Attributes\" />
     <Folder Include="Transfer\Resolvers\" />
     <Folder Include="Extensions\" />
+    <Folder Include="Serializers\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Contracts;
 using GoLava.ApplePie.Extensions;
+using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer.Content;
 using GoLava.ApplePie.Transfer.Handlers;
@@ -17,7 +18,6 @@ namespace GoLava.ApplePie.Transfer
     public class RestClient 
     {
         private readonly HttpClient _httpClient;
-        private readonly JsonSerializerSettings _jsonSerializerSettings;
 
         private static HttpMessageHandler CreateHttpMessageHandlerPipeline()
         {
@@ -38,11 +38,13 @@ namespace GoLava.ApplePie.Transfer
                 throw new ArgumentNullException(nameof(httpMessageHandler));
             
             _httpClient = new HttpClient(httpMessageHandler);
-            _jsonSerializerSettings = new JsonSerializerSettings
-            {
+
+            this.Serializer = new Serializers.JsonSerializer(new JsonSerializerSettings {
                 ContractResolver = new CustomPropertyNamesContractResolver()
-            };
+            });
         }
+
+        public Serializers.JsonSerializer Serializer { get; }
 
         public async Task<RestResponse<TContent>> SendAsync<TContent>(RestClientContext context, RestRequest request)
         {
@@ -98,7 +100,7 @@ namespace GoLava.ApplePie.Transfer
             {
                 if (restResponse.ContentType == RestContentType.Json)
                 {
-                    var content = JsonConvert.DeserializeObject<TContent>(rawContent, _jsonSerializerSettings);
+                    var content = this.Serializer.Deserialize<TContent>(rawContent);
                     restResponse.Content = content;
                 }
 
@@ -137,7 +139,7 @@ namespace GoLava.ApplePie.Transfer
             switch (restRequest.ContentType)
             {
                 case RestContentType.Json:
-                    var json = JsonConvert.SerializeObject(content, _jsonSerializerSettings);
+                    var json = this.Serializer.Serialize(content);
                     httpContent = new StringContent(json, restRequest.ContentEncoding, "application/json");
                     if (restRequest.ContentEncoding == null)
                         httpContent.Headers.ContentType.CharSet = null;
