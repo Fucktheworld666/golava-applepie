@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace GoLava.ApplePie.Contracts.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]

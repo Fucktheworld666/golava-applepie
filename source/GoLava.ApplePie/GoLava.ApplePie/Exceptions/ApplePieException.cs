@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace GoLava.ApplePie.Exceptions
 {
     /// <summary>

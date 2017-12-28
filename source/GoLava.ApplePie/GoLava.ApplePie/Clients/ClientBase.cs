@@ -10,8 +10,6 @@ using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Formatting;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace GoLava.ApplePie.Clients
 {
@@ -306,7 +304,7 @@ namespace GoLava.ApplePie.Clients
             }
             catch (Exception ex)
             {
-                throw new ApplePieException("Failed to get auth token.", ex);
+                throw new ApplePieException("Failed to get auth token. See inner exception for more details.", ex);
             }
         }
 

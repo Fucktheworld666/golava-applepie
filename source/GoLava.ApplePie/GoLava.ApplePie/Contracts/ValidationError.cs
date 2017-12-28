@@ -1,5 +1,4 @@
-﻿using System;
-namespace GoLava.ApplePie.Contracts
+﻿namespace GoLava.ApplePie.Contracts
 {
     public class ValidationError
     {
