@@ -3,6 +3,8 @@
     public enum Authentication
     {
         Success,
-        Failed
+        Failed,
+        TwoStepSelectTrustedDevice,
+        TwoStepCode
     }
 }

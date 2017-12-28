@@ -19,8 +19,36 @@ namespace GoLava.ApplePie.App
             Console.WriteLine("Enter Apple Password:");
             var password = Console.ReadLine();
 
-            var context = await client.LogonAsync(accountName, password);
+            var context = await client.LogonWithCredentialsAsync(accountName, password);
             Console.WriteLine("Logon: {0}", context.Authentication);
+
+            if (context.Authentication == Authentication.TwoStepSelectTrustedDevice)
+            {
+                Console.WriteLine("Two-Step Authentication, select trusted device:");
+                var trustedDevices = context.LogonAuth.TrustedDevices;
+                for (var i = 0; i < trustedDevices.Count; i++) {
+                    var trustedDevice = trustedDevices[i];
+                    Console.WriteLine("{0}) {1} ({2})", i+1, trustedDevice.Name, trustedDevice.Type);
+                }
+
+                if (int.TryParse(Console.ReadLine(), out int index) && index-1 >= 0 && index-1 < trustedDevices.Count)
+                {
+                    context = await client.AcquireTwoStepCodeAsync(context, trustedDevices[index-1]);
+                    if (context.Authentication == Authentication.TwoStepCode)
+                    {
+                        var verifiableDevice = context.LogonAuth.VerifiableDevice;
+                        var securityCode = context.LogonAuth.SecurityCode;
+                        Console.WriteLine("Enter auth {0} digest code for {1}:", securityCode.Length, verifiableDevice.Name);
+
+                        var code = Console.ReadLine();
+                        context = await client.LogonWithTwoStepCodeAsync(context, code);
+                    }
+                }
+                else 
+                {
+                    Console.WriteLine("Failed to select device.");    
+                }
+            }
 
             if (context.Authentication == Authentication.Success)
             {

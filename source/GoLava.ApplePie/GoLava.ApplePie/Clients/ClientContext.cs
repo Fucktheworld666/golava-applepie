@@ -18,6 +18,10 @@ namespace GoLava.ApplePie.Clients
 
         public AuthToken AuthToken { get; set; }
 
+        public LogonAuth LogonAuth { get; set; }
+
+        public TwoStepToken TwoStepToken { get; set; }
+
         public Session Session { get; set; }
 
         internal void AddValue<T>(T item, params object[] keys)

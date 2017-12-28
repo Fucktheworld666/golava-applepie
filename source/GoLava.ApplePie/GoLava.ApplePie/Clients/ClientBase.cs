@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Contracts;
@@ -39,27 +40,65 @@ namespace GoLava.ApplePie.Clients
 
         protected TUrlProvider UrlProvider { get; }
 
-        public async Task<ClientContext> LogonAsync(string username, string password)
+        public async Task<ClientContext> LogonWithCredentialsAsync(string username, string password)
         {
             await Configure.AwaitFalse();
 
             var context = new ClientContext();
             try
             {
-                var logon = await this.LogonAsync(context, new Credentials
+                var logonAuth = await this.LogonWithCredentialsAsync(context, new Credentials
                 {
                     AccountName = username,
                     Password = password
                 });
-
-                var session = await this.GetSessionAsync(context);
-                context.Authentication = Authentication.Success;
-                context.Session = session;
+                context.LogonAuth = logonAuth;
+                if (!logonAuth.IsTwoStepRequired)
+                {
+                    var session = await this.GetSessionAsync(context);
+                    context.Authentication = Authentication.Success;
+                    context.Session = session;
+                }
+                else 
+                {
+                    context.Authentication = Authentication.TwoStepSelectTrustedDevice;    
+                }
             }
             catch (ApplePieException)
             {
                 // todo log exception
                 context.Authentication = Authentication.Failed;
+            }
+            return context;
+        }
+
+        public async Task<ClientContext> AcquireTwoStepCodeAsync(ClientContext context, TrustedDevice trustedDevice)
+        {
+            await Configure.AwaitFalse();
+
+            var logonAuth = await this.LogonWithTwoStepCodeAsync(context, trustedDevice, null);
+            context.Authentication = Authentication.TwoStepCode;
+            context.LogonAuth = logonAuth;
+            context.AddValue(trustedDevice);
+            return context;
+        }
+
+        public async Task<ClientContext> LogonWithTwoStepCodeAsync(ClientContext context, string code)
+        {
+            await Configure.AwaitFalse();
+
+            if (context.TryGetValue(out TrustedDevice trustedDevice))
+            {
+                var logonAuth = await this.LogonWithTwoStepCodeAsync(context, trustedDevice, code);
+                context.Authentication = Authentication.Success;
+                context.LogonAuth = logonAuth;
+                context.DeleteValue<TrustedDevice>();
+            }
+            else 
+            {
+                var logonAuth = context.LogonAuth;
+                context.Authentication = logonAuth != null && logonAuth.TrustedDevices != null && logonAuth.TrustedDevices.Count > 0 
+                    ? Authentication.TwoStepSelectTrustedDevice : Authentication.Failed;
             }
             return context;
         }
@@ -71,7 +110,7 @@ namespace GoLava.ApplePie.Clients
             return new Uri(url);
         }
 
-        protected virtual async Task<Logon> LogonAsync(ClientContext context, Credentials credentials)
+        protected virtual async Task<LogonAuth> LogonWithCredentialsAsync(ClientContext context, Credentials credentials)
         {
             await Configure.AwaitFalse();
 
@@ -79,16 +118,26 @@ namespace GoLava.ApplePie.Clients
             {
                 if (context.AuthToken == null)
                     context.AuthToken = await this.GetAuthTokenAsync(context);
-
-                var headers = new RestHeaders
-                {
-                    { "X-Apple-Widget-Key", context.AuthToken.AuthServiceKey }
-                };
+                
                 var request = RestRequest.Post(
-                    new RestUri(this.UrlProvider.LogonUrl), headers, RestContentType.Json, credentials);
+                    new RestUri(this.UrlProvider.LogonUrl), 
+                    this.GetAuthRequestHeaders(context), 
+                    RestContentType.Json, credentials);
 
-                var response = await this.SendAsync<Logon>(context, request);
+                var response = await this.SendAsync<LogonAuth>(context, request);
                 return response.Content;
+            }
+            catch (ApplePieRestException<LogonAuth> apre)
+            {
+                switch (apre.Response.StatusCode)
+                {
+                    case HttpStatusCode.Forbidden:
+                        throw new ApplePieException($"Invalid account name and password combination. Used '{credentials.AccountName}' as the account name.", apre);
+
+                    case HttpStatusCode.Conflict:
+                        return await this.HandleTwoStepAuthenticationAsync(context, apre.Response);
+                }
+                throw;
             }
             catch (ApplePieException)
             {
@@ -99,6 +148,30 @@ namespace GoLava.ApplePie.Clients
                 throw new ApplePieException("Failed to logon.", ex);
             }
         }
+
+        protected virtual async Task<LogonAuth> LogonWithTwoStepCodeAsync(ClientContext context, TrustedDevice trustedDevice, string code)
+        {
+            await Configure.AwaitFalse();
+
+            RestRequest request;
+            if (string.IsNullOrEmpty(code))
+            {
+                request = RestRequest.Put(
+                    new RestUri(this.UrlProvider.TwoStepVerifyUrl, new { deviceId = trustedDevice.Id }),
+                    this.GetTwoStepHeaders(context));
+            }
+            else
+            {
+                request = RestRequest.Post(
+                    new RestUri(this.UrlProvider.TwoStepVerifyUrl, new { deviceId = trustedDevice.Id }),
+                    this.GetTwoStepHeaders(context),
+                    RestContentType.Json,
+                    new { code });
+            }
+            var response = await this.SendAsync<LogonAuth>(context, request);
+            return response.Content;
+        }
+
 
         protected async Task<Session> GetSessionAsync(ClientContext context)
         {
@@ -167,7 +240,21 @@ namespace GoLava.ApplePie.Clients
                     break;
             }
 
-            throw new ApplePieException(message);
+            throw new ApplePieRestException<TContent>(message, response);
+        }
+
+        private async Task<LogonAuth> HandleTwoStepAuthenticationAsync(
+            ClientContext context, 
+            RestResponse<LogonAuth> logonAuthResponse)
+        {
+            await Configure.AwaitFalse();
+
+            context.TwoStepToken = this.GetTwoStepToken(logonAuthResponse);
+
+            var request = RestRequest.Get(
+                new RestUri(this.UrlProvider.TwoStepAuthUrl), this.GetTwoStepHeaders(context));
+            var response = await this.SendAsync<LogonAuth>(context, request);
+            return response.Content;
         }
 
         private async Task<AuthToken> GetAuthTokenAsync(ClientContext context)
@@ -195,6 +282,23 @@ namespace GoLava.ApplePie.Clients
             }
         }
 
+        private RestHeaders GetAuthRequestHeaders(ClientContext context)
+        {
+            var headers = new RestHeaders
+            {
+                { "X-Apple-Widget-Key", context.AuthToken.AuthServiceKey }
+            };
+            return headers;
+        }
+
+        private RestHeaders GetTwoStepHeaders(ClientContext context)
+        {
+            var headers = this.GetAuthRequestHeaders(context);
+            headers.Add("X-Apple-Id-Session-Id", context.TwoStepToken.SessionId);
+            headers.Add("scnt", context.TwoStepToken.Scnt);
+            return headers;
+        }
+
         private CsrfToken GetCsrfToken<TContent>(RestResponse<TContent> response, CsrfClass csrfClass)
         {
             if (!response.Headers.TryGetValue("csrf", out ISet<string> csrfValues) || csrfValues.Count != 1)
@@ -209,6 +313,21 @@ namespace GoLava.ApplePie.Clients
                 Class = csrfClass
             };
             return csrfToken;
+        }
+
+        private TwoStepToken GetTwoStepToken<TContent>(RestResponse<TContent> response)
+        {
+            if (!response.Headers.TryGetValue("x-apple-id-session-id", out ISet<string> sessionIdValues) || sessionIdValues.Count != 1)
+                return null;
+            if (!response.Headers.TryGetValue("scnt", out ISet<string> scntValues) || scntValues.Count != 1)
+                return null;
+
+            var twoStepToken = new TwoStepToken
+            {
+                Scnt = scntValues.First(),
+                SessionId = sessionIdValues.First()
+            };
+            return twoStepToken;
         }
 
         private static CsrfClass FindCsrfClass(Type type)

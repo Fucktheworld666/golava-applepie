@@ -7,5 +7,9 @@
         string LogonUrl { get; }
 
         string SessionUrl { get; }
+
+        string TwoStepAuthUrl { get; }
+
+        string TwoStepVerifyUrl { get; }
     }
 }

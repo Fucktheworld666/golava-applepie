@@ -1,4 +1,6 @@
-﻿namespace GoLava.ApplePie.Contracts
+﻿using GoLava.ApplePie.Contracts.Attributes;
+
+namespace GoLava.ApplePie.Contracts
 {
     public class Credentials
     {
