@@ -34,6 +34,40 @@ namespace GoLava.ApplePie.Clients.Portal
             return teams;
         }
 
+        public async Task<List<Application>> GetApplicationsAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            if (!context.TryGetValue(out List<PageResult<Application>> applicationsResult, teamId))
+            {
+                applicationsResult = await this.GetApplicationsResultsAsync(context, teamId, platform);
+                context.AddValue(applicationsResult, teamId);
+            }
+            return applicationsResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
+        }
+
+        public async Task<ApplicationDetails> GetApplicationDetails(ClientContext context, string teamId, Application application, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            if (!context.TryGetValue(out ApplicationDetails applicationDetails, teamId, application.Id))
+            {
+                var uriBuilder = new PortalRequestUriBuilder(
+                    new RestUri(this.UrlProvider.GetApplicationDetailsUrl, new { platform }));
+                uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                    { "teamId", teamId }
+                });
+                var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new {
+                    appIdId = application.Id
+                });
+                var response = await this.SendAsync<Result<ApplicationDetails>>(context, request);
+                this.CheckResultForErrors(response.Content);
+                applicationDetails = response.Content.Data;
+                context.AddValue(applicationDetails, teamId, application.Id);
+            }
+            return applicationDetails;
+        }
+
         public async Task<List<Device>> GetDevicesAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
@@ -126,6 +160,20 @@ namespace GoLava.ApplePie.Clients.Portal
             this.CheckResultForErrors(response.Content);
             context.DeleteValue<PageResult<Device>>(teamId);
             return response.Content;
+        }
+
+        private async Task<List<PageResult<Application>>> GetApplicationsResultsAsync(ClientContext context, string teamId, Platform platform)
+        {
+            await Configure.AwaitFalse();
+
+            var request = RestRequest.Post(new RestUri(this.UrlProvider.GetApplicationsUrl, new { platform }));
+            var applicationsResult = await this.SendPageRequestAsync<PageResult<Application>>(
+                context, request,
+                new Dictionary<string, string> {
+                    { "teamId", teamId }
+                }
+            );
+            return applicationsResult;
         }
 
         private async Task<List<PageResult<Device>>> GetDevicesResultsAsync(ClientContext context, string teamId, Platform platform)

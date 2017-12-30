@@ -2,6 +2,10 @@
 {
     public interface IPortalUrlProvider : IUrlProvider
     {
+        string GetApplicationsUrl { get; }
+
+        string GetApplicationDetailsUrl { get; }
+
         string GetDevicesUrl { get; }
 
         string AddDevicesUrl { get; }

@@ -58,9 +58,19 @@ namespace GoLava.ApplePie.App
 
                 foreach (var team in teams)
                 {
+                    var applications = await client.GetApplicationsAsync(context, team.TeamId);
+                    Console.WriteLine("Team {0}: applications count: {1}", team.TeamId, applications.Count);
+
+                    foreach (var application in applications) 
+                    {
+                        var applicationDetails = await client.GetApplicationDetails(context, team.TeamId, application);
+                        Console.WriteLine("\tApplication: {0}", applicationDetails.Name);
+                    }
+
                     var devices = await client.GetDevicesAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: devices count: {1}", team.TeamId, devices.Count);
 
+                    /*
                     var addedDevices = await client.AddDeviceAsync(context, team.TeamId, "1111111111111111111111111111111111111112", "test", Contracts.Portal.DeviceClass.iPhone);
                     Console.WriteLine("Team {0}: added devices count: {1}", team.TeamId, addedDevices.Count);
 
@@ -79,7 +89,7 @@ namespace GoLava.ApplePie.App
                         var changedDevice = await client.ChangeDeviceNameAsync(context, team.TeamId, newDevice, "foobar");
                         if (changedDevice != null)
                             Console.WriteLine("Successfully changed device name to {0}.", changedDevice.Name);
-                    }
+                    }*/
                 }
             }
         }

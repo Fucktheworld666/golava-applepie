@@ -10,6 +10,12 @@
 
         public const string DeviceBaseUrl = PlatformBaseUrl + "device/";
 
+        public const string IdentifiersBaseUrl = PlatformBaseUrl + "identifiers/";
+
+        public string GetApplicationsUrl => IdentifiersBaseUrl + "listAppIds.action";
+
+        public string GetApplicationDetailsUrl => IdentifiersBaseUrl + "getAppIdDetail.action";
+
         public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";
 
         public string AddDevicesUrl => DeviceBaseUrl + "addDevices.action";

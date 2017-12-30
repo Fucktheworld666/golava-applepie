@@ -2,6 +2,7 @@
 {
     public enum CsrfClass
     {
+        Application,
         Device,
         Team,
         Undefined
