@@ -13,14 +13,15 @@
     <Folder Include="Contracts\" />
     <Folder Include="Clients\" />
     <Folder Include="Exceptions\" />
-    <Folder Include="Clients\Portal\" />
-    <Folder Include="Contracts\Portal\" />
+    <Folder Include="Clients\AppleDeveloper\" />
+    <Folder Include="Contracts\AppleDeveloper\" />
     <Folder Include="Transfer\Handlers\" />
     <Folder Include="Contracts\Converters\" />
     <Folder Include="Contracts\Attributes\" />
     <Folder Include="Transfer\Resolvers\" />
     <Folder Include="Extensions\" />
     <Folder Include="Serializers\" />
+    <Folder Include="Clients\AppleId\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

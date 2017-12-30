@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using GoLava.ApplePie.Contracts.Attributes;
+﻿using GoLava.ApplePie.Contracts.Attributes;
 using Newtonsoft.Json;
 
-namespace GoLava.ApplePie.Contracts.Portal
+namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     [CsrfClass(CsrfClass.Application), JsonDataProperty("appId")]
     public class Application

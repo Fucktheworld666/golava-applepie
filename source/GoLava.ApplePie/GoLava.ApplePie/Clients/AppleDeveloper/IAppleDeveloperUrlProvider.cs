@@ -1,4 +1,4 @@
-﻿namespace GoLava.ApplePie.Clients.Portal
+﻿namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
     public interface IPortalUrlProvider : IUrlProvider
     {

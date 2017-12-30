@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Web;
 using GoLava.ApplePie.Transfer;
 
-namespace GoLava.ApplePie.Clients.Portal
+namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
     public class PortalRequestUriBuilder
     {

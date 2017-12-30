@@ -1,6 +1,6 @@
 ﻿using GoLava.ApplePie.Contracts.Attributes;
 
-namespace GoLava.ApplePie.Contracts.Portal
+namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     [CsrfClass(CsrfClass.Device), JsonDataProperty]
     public class Device

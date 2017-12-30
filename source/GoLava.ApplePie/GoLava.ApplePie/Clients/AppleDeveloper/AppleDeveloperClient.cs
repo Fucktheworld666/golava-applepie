@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GoLava.ApplePie.Contracts;
-using GoLava.ApplePie.Contracts.Attributes;
-using GoLava.ApplePie.Contracts.Portal;
+using GoLava.ApplePie.Contracts.AppleDeveloper;
 using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
 
-namespace GoLava.ApplePie.Clients.Portal
+namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
     public class PortalClient : ClientBase<IPortalUrlProvider>
     {
@@ -26,9 +24,9 @@ namespace GoLava.ApplePie.Clients.Portal
             if (!context.TryGetValue(out List<Team> teams))
             {
                 var request = RestRequest.Post(new RestUri(this.UrlProvider.GetTeamsUrl));
-                var response = await this.SendAsync<TeamsResult>(context, request);
+                var response = await this.SendAsync<Result<List<Team>>>(context, request);
 
-                teams = response.Content.Teams;
+                teams = response.Content.Data;
                 context.AddValue(teams);
             }
             return teams;

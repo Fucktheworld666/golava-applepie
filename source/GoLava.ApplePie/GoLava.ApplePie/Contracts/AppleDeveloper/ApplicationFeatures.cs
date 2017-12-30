@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace GoLava.ApplePie.Contracts.Portal
+namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public class ApplicationFeatures
     {

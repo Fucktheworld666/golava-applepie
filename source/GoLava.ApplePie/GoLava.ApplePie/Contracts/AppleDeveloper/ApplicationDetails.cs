@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GoLava.ApplePie.Contracts.Portal
+namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public class ApplicationDetails : Application
     {

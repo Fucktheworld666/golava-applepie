@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GoLava.ApplePie.Clients.Portal;
+using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Contracts;
 
 namespace GoLava.ApplePie.App

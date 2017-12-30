@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using GoLava.ApplePie.Contracts.Attributes;
 
-namespace GoLava.ApplePie.Contracts.Portal
+namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public abstract class PageResult : Result
     {

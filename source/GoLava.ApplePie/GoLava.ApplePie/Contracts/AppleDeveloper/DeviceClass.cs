@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace GoLava.ApplePie.Contracts.Portal
+namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public enum DeviceClass
     {
