@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using GoLava.ApplePie.Transfer.Cookies;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace GoLava.ApplePie.Tests.Transfer.Cookies
@@ -89,6 +90,20 @@ namespace GoLava.ApplePie.Tests.Transfer.Cookies
             cookieJar.Add(new Uri("http://foo.bar.ext"), new Cookie { Name = "b", Value = "y", Domain = "bar.ext" });
 
             var header = cookieJar.GetRequestHeaderValue(new Uri("http://bar.ext"));
+            Assert.Equal("a=x; b=y", header);
+        }
+
+        [Fact]
+        public void CanBeSerialized()
+        {
+            var cookieJar = new CookieJar();
+            cookieJar.Add(new Uri("http://bar.ext"), new Cookie { Name = "a", Value = "x", Domain = "bar.ext" });
+            cookieJar.Add(new Uri("http://foo.bar.ext"), new Cookie { Name = "b", Value = "y", Domain = "bar.ext" });
+
+            var json = JsonConvert.SerializeObject(cookieJar);
+
+            var cookieJarDeserialized = JsonConvert.DeserializeObject<CookieJar>(json);
+            var header = cookieJarDeserialized.GetRequestHeaderValue(new Uri("http://bar.ext"));
             Assert.Equal("a=x; b=y", header);
         }
     }

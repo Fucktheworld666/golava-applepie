@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
     /// <summary>
     /// A container to store <see cref="T:Cookie"/> objects associated with <see cref="T:Uri"/>s.
     /// </summary>
-    public class CookieJar
+    public partial class CookieJar : IEnumerable<DomainCookies>
     {
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>> _store;
         private readonly CookieParser _cookieParser;
@@ -22,6 +23,12 @@ namespace GoLava.ApplePie.Transfer.Cookies
         {
             _store = new ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>>(StringComparer.OrdinalIgnoreCase);
             _cookieParser = new CookieParser();
+        }
+
+        public CookieJar(IEnumerable<DomainCookies> domainCookiesCollection)
+            : this()
+        {
+            this.Assign(domainCookiesCollection);
         }
 
         /// <summary>
@@ -37,7 +44,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
                 throw new ArgumentNullException(nameof(cookie));
 
             var domain = EnsureDomain(uri, cookie);
-            var cookies = _store.GetOrAdd(domain, x => new ConcurrentDictionary<string, Cookie>(StringComparer.OrdinalIgnoreCase));
+            var cookies = _store.GetOrAdd(domain, x => this.CreateCookieDictionary());
             cookies.AddOrUpdate(cookie.Name, cookie, (k, c) => cookie);
         }
 
@@ -108,6 +115,28 @@ namespace GoLava.ApplePie.Transfer.Cookies
             return sb.ToString();
         }
 
+        private void Assign(IEnumerable<DomainCookies> domainCookiesCollection)
+        {
+            if (domainCookiesCollection == null)
+                throw new ArgumentNullException(nameof(domainCookiesCollection));
+            
+            foreach (var domainCookies in domainCookiesCollection)
+            {
+                if (!domainCookies.Domain.StartsWith(".", StringComparison.InvariantCulture))
+                    throw new ArgumentException("Domain must start with a dot.", nameof(domainCookiesCollection));
+
+                var cookies = this.CreateCookieDictionary();
+                foreach (var cookie in domainCookies.Cookies)
+                    cookies.AddOrUpdate(cookie.Name, cookie, (k, c) => cookie);
+                _store[domainCookies.Domain] = cookies;
+            }
+        }
+
+        private ConcurrentDictionary<string, Cookie> CreateCookieDictionary()
+        {
+            return new ConcurrentDictionary<string, Cookie>(StringComparer.OrdinalIgnoreCase);
+        }
+
         private static string EnsureDomain(Uri uri, Cookie cookie)
         {
             var domain = cookie.Domain;
@@ -133,6 +162,16 @@ namespace GoLava.ApplePie.Transfer.Cookies
                 var subDomain = string.Join(".", parts.Skip(i));
                 yield return "." + subDomain;
             }
+        }
+
+        IEnumerator<DomainCookies> IEnumerable<DomainCookies>.GetEnumerator()
+        {
+            return new CookieJarEnumerator(_store);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new CookieJarEnumerator(_store);
         }
     }
 }
