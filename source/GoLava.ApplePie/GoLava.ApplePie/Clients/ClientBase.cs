@@ -224,7 +224,7 @@ namespace GoLava.ApplePie.Clients
             request.Headers.Set("Accept", "application/json", "text/javascript");
             request.Headers.Set("X-Requested-With", "XMLHttpRequest");
 
-            var csrfClass = request.Content is Null n ? n.CsrfClass : FindCsrfClass(typeof(TContent));
+            var csrfClass = FindCsrfClass(typeof(TContent));
             if (context.TryGetValue(out CsrfToken csrfToken, csrfClass))
             {
                 request.Headers.Set("csrf", csrfToken.Value);

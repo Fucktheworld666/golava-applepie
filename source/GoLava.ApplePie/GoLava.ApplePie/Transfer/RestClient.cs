@@ -131,22 +131,18 @@ namespace GoLava.ApplePie.Transfer
             if (restRequest.Method != HttpMethod.Post && restRequest.Method != HttpMethod.Put)
                 return null;
 
-            var content = restRequest.Content;
-            if (content is Null)
-                content = null;
-
             HttpContent httpContent;
             switch (restRequest.ContentType)
             {
                 case RestContentType.Json:
-                    var json = this.Serializer.Serialize(content);
+                    var json = this.Serializer.Serialize(restRequest.Content);
                     httpContent = new StringContent(json, restRequest.ContentEncoding, "application/json");
                     if (restRequest.ContentEncoding == null)
                         httpContent.Headers.ContentType.CharSet = null;
                     httpContent.Headers.ContentLength = json.Length;
                     break;
                 case RestContentType.FormUrlEncoded:
-                    httpContent = new CustomFormUrlEncodedContent(content);
+                    httpContent = new CustomFormUrlEncodedContent(restRequest.Content);
                     break;
                 default:
                     httpContent = new NullContent();

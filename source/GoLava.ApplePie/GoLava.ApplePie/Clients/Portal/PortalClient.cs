@@ -69,8 +69,8 @@ namespace GoLava.ApplePie.Clients.Portal
                 { "teamId", teamId },
                 { "deviceId", device.DeviceId }
             });
-            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new Null(CsrfClass.Device));
-            var response = await this.SendAsync<Result>(context, request);
+            var request = RestRequest.Post(uriBuilder.ToUri());
+            var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
             context.DeleteValue<PageResult<Device>>(teamId);
             return true;
@@ -87,7 +87,7 @@ namespace GoLava.ApplePie.Clients.Portal
                 { "displayId", device.DeviceId },
                 { "deviceNumber", device.DeviceNumber }
             });
-            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new Null(CsrfClass.Device));
+            var request = RestRequest.Post(uriBuilder.ToUri());
             var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
             context.DeleteValue<PageResult<Device>>(teamId);
