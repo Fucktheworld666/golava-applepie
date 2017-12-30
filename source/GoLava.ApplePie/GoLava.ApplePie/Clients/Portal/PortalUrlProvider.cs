@@ -10,7 +10,7 @@
 
         public const string DeviceBaseUrl = PlatformBaseUrl + "device/";
 
-        public string DevicesUrl => DeviceBaseUrl + "listDevices.action";
+        public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";
 
         public string AddDevicesUrl => DeviceBaseUrl + "addDevices.action";
 
@@ -20,10 +20,10 @@
 
         public string UpdateDeviceUrl => DeviceBaseUrl + "updateDevice.action";
 
-        public string TeamsUrl => BaseUrl + "getTeams";
+        public string GetTeamsUrl => BaseUrl + "getTeams";
 
-        public string TeamMembersUrl => BaseUrl + "getTeamMembers";
+        public string GetTeamMembersUrl => BaseUrl + "getTeamMembers";
 
-        public string TeamInvitesUrl => BaseUrl + "getInvites";
+        public string GetTeamInvitesUrl => BaseUrl + "getInvites";
     }
 }

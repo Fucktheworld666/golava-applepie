@@ -25,7 +25,7 @@ namespace GoLava.ApplePie.Clients.Portal
 
             if (!context.TryGetValue(out List<Team> teams))
             {
-                var request = RestRequest.Post(new RestUri(this.UrlProvider.TeamsUrl));
+                var request = RestRequest.Post(new RestUri(this.UrlProvider.GetTeamsUrl));
                 var response = await this.SendAsync<TeamsResult>(context, request);
 
                 teams = response.Content.Teams;
@@ -132,7 +132,7 @@ namespace GoLava.ApplePie.Clients.Portal
         {
             await Configure.AwaitFalse();
 
-            var request = RestRequest.Post(new RestUri(this.UrlProvider.DevicesUrl, new { platform }));
+            var request = RestRequest.Post(new RestUri(this.UrlProvider.GetDevicesUrl, new { platform }));
             var devicesResult = await this.SendPageRequestAsync<PageResult<Device>>(
                 context, request,
                 new Dictionary<string, string> {

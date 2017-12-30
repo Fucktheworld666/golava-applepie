@@ -2,7 +2,7 @@
 {
     public interface IPortalUrlProvider : IUrlProvider
     {
-        string DevicesUrl { get; }
+        string GetDevicesUrl { get; }
 
         string AddDevicesUrl { get; }
 
@@ -12,10 +12,10 @@
 
         string UpdateDeviceUrl { get; }
 
-        string TeamsUrl { get; }
+        string GetTeamsUrl { get; }
 
-        string TeamMembersUrl { get; }
+        string GetTeamMembersUrl { get; }
 
-        string TeamInvitesUrl { get; }
+        string GetTeamInvitesUrl { get; }
     }
 }
