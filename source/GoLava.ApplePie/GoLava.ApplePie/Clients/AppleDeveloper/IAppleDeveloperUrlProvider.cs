@@ -4,6 +4,8 @@
     {
         string AddApplicationUrl { get; }
 
+        string DeleteApplicationUrl { get; }
+
         string GetApplicationsUrl { get; }
 
         string GetApplicationDetailsUrl { get; }

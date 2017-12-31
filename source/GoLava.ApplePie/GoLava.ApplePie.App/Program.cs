@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Contracts;
+using GoLava.ApplePie.Contracts.AppleDeveloper;
 
 namespace GoLava.ApplePie.App
 {
@@ -66,9 +67,24 @@ namespace GoLava.ApplePie.App
                         var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, team.TeamId, application);
                         Console.WriteLine("\tApplication: {0}", applicationDetails.Name);
 
-                        var changedApplicationDetails = await appleDeveloperClient.UpdateApplicationFeatureAsync(
-                            context, team.TeamId, applicationDetails, f => f.HomeKit, !applicationDetails.Features.HomeKit);
+                        if (!applicationDetails.IsWildCard && applicationDetails.CanEdit.HasValue && applicationDetails.CanEdit.Value)
+                        {
+                            var changedApplicationDetails = await appleDeveloperClient.UpdateApplicationFeatureAsync(
+                                context, team.TeamId, applicationDetails, f => f.HomeKit, !applicationDetails.Features.HomeKit);
+                        }
                     }
+
+                    var newApplication = await appleDeveloperClient.AddApplicationAsync(context, team.TeamId, new AddApplication
+                    {
+                        Passbook = true,
+                        HealthKit = true,
+                        Type = ApplicationType.Explicit,
+                        Identifier = "ich.du.er.so",
+                        Name = "golava test",
+                        Prefix = team.TeamId
+                    });
+
+                    await appleDeveloperClient.DeleteApplicationAsync(context, team.TeamId, newApplication);
 
                     var devices = await appleDeveloperClient.GetDevicesAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: devices count: {1}", team.TeamId, devices.Count);

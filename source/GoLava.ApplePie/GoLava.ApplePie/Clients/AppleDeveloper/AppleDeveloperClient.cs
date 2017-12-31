@@ -53,6 +53,22 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return response.Content.Data;
         }
 
+        public async Task<bool> DeleteApplicationAsync(ClientContext context, string teamId, Application application, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(
+                new RestUri(this.UrlProvider.DeleteApplicationUrl, new { platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", teamId },
+                { "appIdId", application.Id }
+            });
+            var request = RestRequest.Post(uriBuilder.ToUri());
+            var response = await this.SendAsync<Result<Application>>(context, request);
+            this.CheckResultForErrors(response.Content);
+            return true;
+        }
+
         public async Task<List<Application>> GetApplicationsAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();

@@ -14,6 +14,8 @@
 
         public string AddApplicationUrl => IdentifiersBaseUrl + "addAppId.action";
 
+        public string DeleteApplicationUrl => IdentifiersBaseUrl + "deleteAppId.action";
+
         public string GetApplicationsUrl => IdentifiersBaseUrl + "listAppIds.action";
 
         public string GetApplicationDetailsUrl => IdentifiersBaseUrl + "getAppIdDetail.action";
