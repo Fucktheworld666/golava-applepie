@@ -12,6 +12,8 @@
 
         public const string IdentifiersBaseUrl = PlatformBaseUrl + "identifiers/";
 
+        public string AddApplicationUrl => IdentifiersBaseUrl + "addAppId.action";
+
         public string GetApplicationsUrl => IdentifiersBaseUrl + "listAppIds.action";
 
         public string GetApplicationDetailsUrl => IdentifiersBaseUrl + "getAppIdDetail.action";

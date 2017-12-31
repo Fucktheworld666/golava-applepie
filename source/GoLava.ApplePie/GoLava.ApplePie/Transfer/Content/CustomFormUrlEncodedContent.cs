@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
+using GoLava.ApplePie.Contracts.Attributes;
 using GoLava.ApplePie.Extensions;
 using GoLava.ApplePie.Transfer.Resolvers;
+using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Transfer.Content
 {
@@ -39,7 +42,25 @@ namespace GoLava.ApplePie.Transfer.Content
             foreach (var property in parametersType.GetProperties())
             {
                 var value = ConvertValue(property.GetMethod.Invoke(content, null));
-                var name = ConvertName(property.Name);
+                if (value == null)
+                    continue;
+                
+                string name;
+
+                var formDataPropertyAttribute = property.GetCustomAttribute<FormDataPropertyAttribute>();
+                if (!string.IsNullOrEmpty(formDataPropertyAttribute?.PropertyName))
+                {
+                    name = formDataPropertyAttribute.PropertyName;
+                }
+                else 
+                {
+                    var jsonPropertyAttribute = property.GetCustomAttribute<JsonPropertyAttribute>();
+                    if (!string.IsNullOrEmpty(jsonPropertyAttribute?.PropertyName))
+                        name = jsonPropertyAttribute.PropertyName;
+                    else
+                        name = ConvertName(property.Name);
+                }
+
                 list.Add(new KeyValuePair<string, string>(name, value));
             }
 
@@ -54,7 +75,7 @@ namespace GoLava.ApplePie.Transfer.Content
         private static string ConvertValue(object value)
         {
             if (value == null)
-                return string.Empty;
+                return null;
                     
             if (value is string s)
                 return s;

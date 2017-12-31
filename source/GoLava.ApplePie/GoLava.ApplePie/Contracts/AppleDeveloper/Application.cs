@@ -22,8 +22,8 @@ namespace GoLava.ApplePie.Contracts.AppleDeveloper
 
         public bool IsDuplicate { get; set; }
 
-        public bool CanEdit { get; set; }
+        public bool? CanEdit { get; set; }
 
-        public bool CanDelete { get; set; }
+        public bool? CanDelete { get; set; }
     }
 }

@@ -2,6 +2,8 @@
 {
     public interface IAppleDeveloperUrlProvider : IUrlProvider
     {
+        string AddApplicationUrl { get; }
+
         string GetApplicationsUrl { get; }
 
         string GetApplicationDetailsUrl { get; }
