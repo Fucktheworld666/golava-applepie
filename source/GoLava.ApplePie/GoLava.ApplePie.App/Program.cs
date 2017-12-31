@@ -69,8 +69,13 @@ namespace GoLava.ApplePie.App
 
                         if (!applicationDetails.IsWildCard && applicationDetails.CanEdit.HasValue && applicationDetails.CanEdit.Value)
                         {
+                            // change value of HomeKit
                             var changedApplicationDetails = await appleDeveloperClient.UpdateApplicationFeatureAsync(
                                 context, team.TeamId, applicationDetails, f => f.HomeKit, !applicationDetails.Features.HomeKit);
+
+                            // change it back
+                            changedApplicationDetails = await appleDeveloperClient.UpdateApplicationFeatureAsync(
+                                context, team.TeamId, changedApplicationDetails, f => f.HomeKit, !changedApplicationDetails.Features.HomeKit);
                         }
                     }
 
