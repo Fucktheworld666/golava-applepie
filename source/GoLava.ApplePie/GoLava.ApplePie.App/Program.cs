@@ -11,7 +11,7 @@ namespace GoLava.ApplePie.App
 
         static async Task MainAsync(string[] args)
         {
-            var client = new PortalClient(new PortalUrlProvider());
+            var appleDeveloperClient = new AppleDeveloperClient(new AppleDeveloperUrlProvider());
 
             Console.WriteLine("Enter Apple Account Name:");
             var accountName = Console.ReadLine();
@@ -19,7 +19,7 @@ namespace GoLava.ApplePie.App
             Console.WriteLine("Enter Apple Password:");
             var password = Console.ReadLine();
 
-            var context = await client.LogonWithCredentialsAsync(accountName, password);
+            var context = await appleDeveloperClient.LogonWithCredentialsAsync(accountName, password);
             Console.WriteLine("Logon: {0}", context.Authentication);
 
             while (context.Authentication == Authentication.TwoStepSelectTrustedDevice)
@@ -33,7 +33,7 @@ namespace GoLava.ApplePie.App
 
                 if (int.TryParse(Console.ReadLine(), out int index) && index-1 >= 0 && index-1 < trustedDevices.Count)
                 {
-                    context = await client.AcquireTwoStepCodeAsync(context, trustedDevices[index-1]);
+                    context = await appleDeveloperClient.AcquireTwoStepCodeAsync(context, trustedDevices[index-1]);
                     while (context.Authentication == Authentication.TwoStepCode)
                     {
                         var verifiableDevice = context.LogonAuth.VerifiableDevice;
@@ -41,7 +41,7 @@ namespace GoLava.ApplePie.App
                         Console.WriteLine("Enter auth {0} digest code for {1}:", securityCode.Length, verifiableDevice.Name);
 
                         var code = Console.ReadLine();
-                        context = await client.LogonWithTwoStepCodeAsync(context, code);
+                        context = await appleDeveloperClient.LogonWithTwoStepCodeAsync(context, code);
                     }
                 }
                 else 
@@ -53,21 +53,21 @@ namespace GoLava.ApplePie.App
 
             if (context.Authentication == Authentication.Success)
             {
-                var teams = await client.GetTeamsAsync(context);
+                var teams = await appleDeveloperClient.GetTeamsAsync(context);
                 Console.WriteLine("Teams count: {0}", teams.Count);
 
                 foreach (var team in teams)
                 {
-                    var applications = await client.GetApplicationsAsync(context, team.TeamId);
+                    var applications = await appleDeveloperClient.GetApplicationsAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: applications count: {1}", team.TeamId, applications.Count);
 
                     foreach (var application in applications) 
                     {
-                        var applicationDetails = await client.GetApplicationDetails(context, team.TeamId, application);
+                        var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, team.TeamId, application);
                         Console.WriteLine("\tApplication: {0}", applicationDetails.Name);
                     }
 
-                    var devices = await client.GetDevicesAsync(context, team.TeamId);
+                    var devices = await appleDeveloperClient.GetDevicesAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: devices count: {1}", team.TeamId, devices.Count);
 
                     /*

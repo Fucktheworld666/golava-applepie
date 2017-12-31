@@ -1,6 +1,6 @@
 ﻿namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
-    public class PortalUrlProvider : UrlProviderBase, IPortalUrlProvider
+    public class AppleDeveloperUrlProvider : UrlProviderBase, IAppleDeveloperUrlProvider
     {
         public const string ProtocolVersion = "QH65B2";
 

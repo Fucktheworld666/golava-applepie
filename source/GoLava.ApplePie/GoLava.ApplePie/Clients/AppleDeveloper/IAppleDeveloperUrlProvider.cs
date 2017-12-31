@@ -1,6 +1,6 @@
 ﻿namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
-    public interface IPortalUrlProvider : IUrlProvider
+    public interface IAppleDeveloperUrlProvider : IUrlProvider
     {
         string GetApplicationsUrl { get; }
 

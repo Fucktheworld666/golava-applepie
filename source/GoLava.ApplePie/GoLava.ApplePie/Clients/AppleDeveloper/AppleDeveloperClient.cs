@@ -9,12 +9,12 @@ using GoLava.ApplePie.Transfer;
 
 namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
-    public class PortalClient : ClientBase<IPortalUrlProvider>
+    public class AppleDeveloperClient : ClientBase<IAppleDeveloperUrlProvider>
     {
-        public PortalClient(IPortalUrlProvider urlProvider)
+        public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider)
                 : base(urlProvider) { }
 
-        public PortalClient(RestClient restClient, IPortalUrlProvider urlProvider)
+        public AppleDeveloperClient(RestClient restClient, IAppleDeveloperUrlProvider urlProvider)
             : base(restClient, urlProvider) { }
 
         public async Task<List<Team>> GetTeamsAsync(ClientContext context)
@@ -50,7 +50,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
 
             if (!context.TryGetValue(out ApplicationDetails applicationDetails, teamId, application.Id))
             {
-                var uriBuilder = new PortalRequestUriBuilder(
+                var uriBuilder = new AppleDeveloperRequestUriBuilder(
                     new RestUri(this.UrlProvider.GetApplicationDetailsUrl, new { platform }));
                 uriBuilder.AddQueryValues(new Dictionary<string, string> {
                     { "teamId", teamId }
@@ -96,7 +96,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.DeleteDeviceUrl, new { platform }));
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.DeleteDeviceUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
                 { "teamId", teamId },
                 { "deviceId", device.DeviceId }
@@ -112,7 +112,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.EnableDeviceUrl, new { platform }));
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.EnableDeviceUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
                 { "teamId", teamId },
                 { "deviceId", string.Empty },
@@ -130,7 +130,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.UpdateDeviceUrl, new { platform }));
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.UpdateDeviceUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
                 { "teamId", teamId },
             });
@@ -149,7 +149,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new PortalRequestUriBuilder(new RestUri(this.UrlProvider.AddDevicesUrl, new { platform }));
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.AddDevicesUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
                 { "teamId", teamId }
             });
@@ -199,7 +199,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new PortalRequestUriBuilder(request.Uri);
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(request.Uri);
             uriBuilder.AddQueryValues(queryValues);
 
             var pages = new List<TPageResult>();

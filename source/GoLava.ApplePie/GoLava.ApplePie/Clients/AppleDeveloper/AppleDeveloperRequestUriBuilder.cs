@@ -6,12 +6,12 @@ using GoLava.ApplePie.Transfer;
 
 namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
-    public class PortalRequestUriBuilder
+    public class AppleDeveloperRequestUriBuilder
     {
         private readonly UriBuilder _uriBuilder;
         private readonly NameValueCollection _query;
 
-        public PortalRequestUriBuilder(Uri uri)
+        public AppleDeveloperRequestUriBuilder(Uri uri)
         {
             _uriBuilder = new UriBuilder(uri);
             _query = HttpUtility.ParseQueryString(_uriBuilder.Query);
@@ -21,7 +21,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             _query["userLocale"] = "en_US";
         }
 
-        public PortalRequestUriBuilder AddQueryValues(Dictionary<string, string> queryValues)
+        public AppleDeveloperRequestUriBuilder AddQueryValues(Dictionary<string, string> queryValues)
         {
             if (queryValues != null)
             {
