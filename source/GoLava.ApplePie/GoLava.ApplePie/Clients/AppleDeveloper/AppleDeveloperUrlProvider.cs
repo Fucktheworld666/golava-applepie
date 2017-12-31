@@ -16,6 +16,8 @@
 
         public string GetApplicationDetailsUrl => IdentifiersBaseUrl + "getAppIdDetail.action";
 
+        public string UpdateApplicationUrl => IdentifiersBaseUrl + "updateService.action";
+
         public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";
 
         public string AddDevicesUrl => DeviceBaseUrl + "addDevices.action";

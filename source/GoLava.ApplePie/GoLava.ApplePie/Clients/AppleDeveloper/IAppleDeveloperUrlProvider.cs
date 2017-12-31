@@ -6,6 +6,8 @@
 
         string GetApplicationDetailsUrl { get; }
 
+        string UpdateApplicationUrl { get; }
+
         string GetDevicesUrl { get; }
 
         string AddDevicesUrl { get; }

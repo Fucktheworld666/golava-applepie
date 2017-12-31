@@ -65,6 +65,9 @@ namespace GoLava.ApplePie.App
                     {
                         var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, team.TeamId, application);
                         Console.WriteLine("\tApplication: {0}", applicationDetails.Name);
+
+                        var changedApplicationDetails = await appleDeveloperClient.UpdateApplicationFeatureAsync(
+                            context, team.TeamId, applicationDetails, f => f.HomeKit, !applicationDetails.Features.HomeKit);
                     }
 
                     var devices = await appleDeveloperClient.GetDevicesAsync(context, team.TeamId);

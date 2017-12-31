@@ -1,16 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Contracts.AppleDeveloper;
 using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
+using GoLava.ApplePie.Transfer.Resolvers;
+using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
     public class AppleDeveloperClient : ClientBase<IAppleDeveloperUrlProvider>
     {
+        private readonly CustomPropertyNamesContractResolver _resolver = new CustomPropertyNamesContractResolver();
+
         public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider)
                 : base(urlProvider) { }
 
@@ -63,6 +69,48 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 applicationDetails = response.Content.Data;
                 context.AddValue(applicationDetails, teamId, application.Id);
             }
+            return applicationDetails;
+        }
+
+        public async Task<ApplicationDetails> UpdateApplicationFeatureAsync<TFeatureValue>(
+            ClientContext context, string teamId, ApplicationDetails applicationDetails, 
+            Expression<Func<ApplicationFeatures, TFeatureValue>> feature, TFeatureValue value, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var member = feature.Body as MemberExpression;
+            if (member == null)
+                throw new ArgumentException($"Expression '{feature}' does not refer to a property.", nameof(feature));
+
+            var property = member.Member as PropertyInfo;
+            if (property == null)
+                throw new ArgumentException($"Expression '{feature}' does not refer to a property.", nameof(feature));
+
+            var originalValue = property.GetValue(applicationDetails.Features);
+            if (value.Equals(originalValue))
+                return applicationDetails;
+
+            var valueType = typeof(TFeatureValue);
+            var jsonProperty = property.GetCustomAttribute<JsonPropertyAttribute>();
+            var featureType = jsonProperty?.PropertyName ?? _resolver.GetResolvedPropertyName(property.Name);
+            var featureValue = valueType == typeof(bool)
+                ? ((bool)(object)value ? "yes" : "no")
+                : value.ToString();
+
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(
+               new RestUri(this.UrlProvider.UpdateApplicationUrl, new { platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", teamId },
+                { "displayId", applicationDetails.Id },
+                { "featureType", featureType },
+                { "featureValue", featureValue }
+            });
+            var request = RestRequest.Post(uriBuilder.ToUri());
+            var response = await this.SendAsync<Result<ApplicationDetails>>(context, request);
+            this.CheckResultForErrors(response.Content);
+
+            property.SetValue(applicationDetails.Features, value);
+
             return applicationDetails;
         }
 
