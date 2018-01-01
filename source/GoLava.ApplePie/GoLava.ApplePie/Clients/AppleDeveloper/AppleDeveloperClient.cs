@@ -61,22 +61,20 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, addApplication);
             var response = await this.SendAsync<Result<Application>>(context, request);
             this.CheckResultForErrors(response.Content);
-            return response.Content.Data;
+
+            var application = response.Content.Data;
+            application.TeamId = teamId;
+            return application;
         }
 
-        public Task<bool> DeleteApplicationAsync(ClientContext context, Application application, Platform platform = Platform.Ios)
-        {
-            return this.DeleteApplicationAsync(context, application.Prefix, application, platform);
-        }
-
-        public async Task<bool> DeleteApplicationAsync(ClientContext context, string teamId, Application application, Platform platform = Platform.Ios)
+        public async Task<bool> DeleteApplicationAsync(ClientContext context, Application application, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
             var uriBuilder = new AppleDeveloperRequestUriBuilder(
                 new RestUri(this.UrlProvider.DeleteApplicationUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
-                { "teamId", teamId },
+                { "teamId", application.TeamId },
                 { "appIdId", application.Id }
             });
             var request = RestRequest.Post(uriBuilder.ToUri());
@@ -97,29 +95,27 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            if (!context.TryGetValue(out List<PageResult<Application>> applicationsResult, teamId))
+            if (!context.TryGetValue(out List<Application> applications, teamId))
             {
-                applicationsResult = await this.GetApplicationsResultsAsync(context, teamId, platform);
-                context.AddValue(applicationsResult, teamId);
+                var applicationsResult = await this.GetApplicationsResultsAsync(context, teamId, platform);
+
+                applications = applicationsResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
+                applications.ForEach(a => a.TeamId = teamId);
+                context.AddValue(applications, teamId);
             }
-            return applicationsResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
+            return applications;
         }
 
-        public Task<ApplicationDetails> GetApplicationDetails(ClientContext context, Application application, Platform platform = Platform.Ios)
-        {
-            return this.GetApplicationDetails(context, application.Prefix, application, platform);
-        }
-
-        public async Task<ApplicationDetails> GetApplicationDetails(ClientContext context, string teamId, Application application, Platform platform = Platform.Ios)
+        public async Task<ApplicationDetails> GetApplicationDetails(ClientContext context, Application application, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
-            if (!context.TryGetValue(out ApplicationDetails applicationDetails, teamId, application.Id))
+            if (!context.TryGetValue(out ApplicationDetails applicationDetails, application.TeamId, application.Id))
             {
                 var uriBuilder = new AppleDeveloperRequestUriBuilder(
                     new RestUri(this.UrlProvider.GetApplicationDetailsUrl, new { platform }));
                 uriBuilder.AddQueryValues(new Dictionary<string, string> {
-                    { "teamId", teamId }
+                    { "teamId", application.TeamId }
                 });
                 var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new {
                     appIdId = application.Id
@@ -127,20 +123,14 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 var response = await this.SendAsync<Result<ApplicationDetails>>(context, request);
                 this.CheckResultForErrors(response.Content);
                 applicationDetails = response.Content.Data;
-                context.AddValue(applicationDetails, teamId, application.Id);
+                applicationDetails.TeamId = application.TeamId;
+                context.AddValue(applicationDetails, application.TeamId, application.Id);
             }
             return applicationDetails;
         }
 
-        public Task<ApplicationDetails> UpdateApplicationFeatureAsync<TFeatureValue>(
-            ClientContext context, ApplicationDetails applicationDetails,
-            Expression<Func<ApplicationFeatures, TFeatureValue>> feature, TFeatureValue value, Platform platform = Platform.Ios)
-        {
-            return this.UpdateApplicationFeatureAsync(context, applicationDetails.Prefix, applicationDetails, feature, value, platform);
-        }
-
         public async Task<ApplicationDetails> UpdateApplicationFeatureAsync<TFeatureValue>(
-            ClientContext context, string teamId, ApplicationDetails applicationDetails, 
+            ClientContext context, ApplicationDetails applicationDetails, 
             Expression<Func<ApplicationFeatures, TFeatureValue>> feature, TFeatureValue value, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
@@ -167,7 +157,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var uriBuilder = new AppleDeveloperRequestUriBuilder(
                new RestUri(this.UrlProvider.UpdateApplicationUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
-                { "teamId", teamId },
+                { "teamId", applicationDetails.TeamId },
                 { "displayId", applicationDetails.Id },
                 { "featureType", featureType },
                 { "featureValue", featureValue }
@@ -193,12 +183,16 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            if (!context.TryGetValue(out List<PageResult<Device>> devicesResult, teamId))
+            if (!context.TryGetValue(out List<Device> devices, teamId))
             {
-                devicesResult = await this.GetDevicesResultsAsync(context, teamId, platform);
-                context.AddValue(devicesResult, teamId);
+                var devicesResult = await this.GetDevicesResultsAsync(context, teamId, platform);
+
+                devices = devicesResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
+                devices.ForEach(d => d.TeamId = teamId);
+
+                context.AddValue(devices, teamId);
             }
-            return devicesResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
+            return devices;
         }
 
         public async Task<List<Device>> AddDeviceAsync(ClientContext context, string teamId, string uiid, string name, DeviceClass deviceClass, Platform platform = Platform.Ios)
@@ -215,29 +209,29 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return result.Data;
         }
 
-        public async Task<bool> DisableDeviceAsync(ClientContext context, string teamId, Device device, Platform platform = Platform.Ios)
+        public async Task<bool> DisableDeviceAsync(ClientContext context, Device device, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
             var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.DeleteDeviceUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
-                { "teamId", teamId },
+                { "teamId", device.TeamId },
                 { "deviceId", device.DeviceId }
             });
             var request = RestRequest.Post(uriBuilder.ToUri());
             var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
-            context.DeleteValue<PageResult<Device>>(teamId);
+            context.DeleteValue<PageResult<Device>>(device.TeamId);
             return true;
         }
 
-        public async Task<Device> EnableDeviceAsync(ClientContext context, string teamId, Device device, Platform platform = Platform.Ios)
+        public async Task<Device> EnableDeviceAsync(ClientContext context, Device device, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
             var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.EnableDeviceUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
-                { "teamId", teamId },
+                { "teamId", device.TeamId },
                 { "deviceId", string.Empty },
                 { "displayId", device.DeviceId },
                 { "deviceNumber", device.DeviceNumber }
@@ -245,17 +239,17 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var request = RestRequest.Post(uriBuilder.ToUri());
             var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
-            context.DeleteValue<PageResult<Device>>(teamId);
+            context.DeleteValue<PageResult<Device>>(device.TeamId);
             return response.Content.Data;
         }
 
-        public async Task<Device> ChangeDeviceNameAsync(ClientContext context, string teamId, Device device, string newName, Platform platform = Platform.Ios)
+        public async Task<Device> ChangeDeviceNameAsync(ClientContext context, Device device, string newName, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
             var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.UpdateDeviceUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
-                { "teamId", teamId },
+                { "teamId", device.TeamId },
             });
             var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, new UpdateDevice {
                 DeviceId = device.DeviceId,
@@ -264,7 +258,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             });
             var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
-            context.DeleteValue<PageResult<Device>>(teamId);
+            context.DeleteValue<PageResult<Device>>(device.TeamId);
             return response.Content.Data;
         }
 
@@ -318,11 +312,13 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
 
             var teams = await this.GetTeamsAsync(context);
             if (teams == null || teams.Count == 0)
-                throw new ApplePieException(""); // todo
-
+            {
+                var user = context.Session.User;
+                throw new ApplePieException($"User '{user.FullName} ({user.Id})' does not have access to any teams with an active membership.");
+            }
             if (teams.Count > 1)
             {
-                // todo: logo
+                // todo: log
             }
 
             return teams[0];

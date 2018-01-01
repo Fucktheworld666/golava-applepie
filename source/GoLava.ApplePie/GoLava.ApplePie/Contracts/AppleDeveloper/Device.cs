@@ -1,4 +1,5 @@
 ﻿using GoLava.ApplePie.Contracts.Attributes;
+using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
@@ -18,5 +19,8 @@ namespace GoLava.ApplePie.Contracts.AppleDeveloper
         public string DeviceClass { get; set; }
 
         public string Model { get; set; }
+
+        [JsonIgnore]
+        public string TeamId { get; set; }
     }
 }

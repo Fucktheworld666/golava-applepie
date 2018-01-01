@@ -25,5 +25,8 @@ namespace GoLava.ApplePie.Contracts.AppleDeveloper
         public bool? CanEdit { get; set; }
 
         public bool? CanDelete { get; set; }
+
+        [JsonIgnore]
+        public string TeamId { get; set; }
     }
 }

@@ -64,18 +64,18 @@ namespace GoLava.ApplePie.App
 
                     foreach (var application in applications) 
                     {
-                        var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, team.TeamId, application);
+                        var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, application);
                         Console.WriteLine("\tApplication: {0}", applicationDetails.Name);
 
                         if (!applicationDetails.IsWildCard && applicationDetails.CanEdit.HasValue && applicationDetails.CanEdit.Value)
                         {
                             // change value of HomeKit
                             var changedApplicationDetails = await appleDeveloperClient.UpdateApplicationFeatureAsync(
-                                context, team.TeamId, applicationDetails, f => f.HomeKit, !applicationDetails.Features.HomeKit);
+                                context, applicationDetails, f => f.HomeKit, !applicationDetails.Features.HomeKit);
 
                             // change it back
                             changedApplicationDetails = await appleDeveloperClient.UpdateApplicationFeatureAsync(
-                                context, team.TeamId, changedApplicationDetails, f => f.HomeKit, !changedApplicationDetails.Features.HomeKit);
+                                context, changedApplicationDetails, f => f.HomeKit, !changedApplicationDetails.Features.HomeKit);
                         }
                     }
 
@@ -85,11 +85,10 @@ namespace GoLava.ApplePie.App
                         HealthKit = true,
                         Type = ApplicationType.Explicit,
                         Identifier = "ich.du.er.so",
-                        Name = "golava test",
-                        Prefix = team.TeamId
+                        Name = "golava test"
                     });
 
-                    await appleDeveloperClient.DeleteApplicationAsync(context, team.TeamId, newApplication);
+                    await appleDeveloperClient.DeleteApplicationAsync(context, newApplication);
 
                     var devices = await appleDeveloperClient.GetDevicesAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: devices count: {1}", team.TeamId, devices.Count);
