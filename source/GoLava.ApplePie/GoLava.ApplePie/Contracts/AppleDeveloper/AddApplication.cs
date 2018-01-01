@@ -9,7 +9,7 @@ namespace GoLava.ApplePie.Contracts.AppleDeveloper
 
         public string Name { get; set; }
 
-        public string Prefix { get; set; }
+        internal string Prefix { get; set; }
 
         public string Identifier { get; set; }
 

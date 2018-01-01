@@ -20,6 +20,8 @@
 
         public string GetApplicationDetailsUrl => IdentifiersBaseUrl + "getAppIdDetail.action";
 
+        public string GetApplicationPrefixesUrl => IdentifiersBaseUrl + "listAppIdPrefixes.action";
+
         public string UpdateApplicationUrl => IdentifiersBaseUrl + "updateService.action";
 
         public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";

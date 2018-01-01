@@ -23,6 +23,11 @@ namespace GoLava.ApplePie.Clients
             _stash = new ConcurrentDictionary<string, object>();
         }
 
+        private ClientContext(ConcurrentDictionary<string, object> stash)
+        {
+            _stash = stash;
+        }
+
         /// <summary>
         /// Gets or sets the value of the current authentication state.
         /// </summary>
@@ -49,6 +54,11 @@ namespace GoLava.ApplePie.Clients
         public Session Session { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether to force retrieving data from backend.
+        /// </summary>
+        public bool IsForceFromBackend { get; private set; }
+
+        /// <summary>
         /// Gets or sets the csrf tokens.
         /// </summary>
         public IEnumerable<CsrfToken> CsrfTokens 
@@ -72,6 +82,41 @@ namespace GoLava.ApplePie.Clients
                         this.AddValue(csrfToken, csrfToken.Class);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns an context that will retrieve all data from the backend.
+        /// </summary>
+        /// <returns>The backend context.</returns>
+        public ClientContext AsBackendContext()
+        {
+            return this.IsForceFromBackend ? this : new ClientContext(_stash)
+            {
+                Authentication = this.Authentication,
+                AuthToken = this.AuthToken,
+                LogonAuth = this.LogonAuth,
+                TwoStepToken = this.TwoStepToken,
+                Session = this.Session,
+                IsForceFromBackend = true
+            };
+        }
+
+        /// <summary>
+        /// Returns an context that will check the cache first before retrieving 
+        /// data from the backend.
+        /// </summary>
+        /// <returns>The backend context.</returns>
+        public ClientContext AsCacheContext()
+        {
+            return !this.IsForceFromBackend ? this : new ClientContext(_stash)
+            {
+                Authentication = this.Authentication,
+                AuthToken = this.AuthToken,
+                LogonAuth = this.LogonAuth,
+                TwoStepToken = this.TwoStepToken,
+                Session = this.Session,
+                IsForceFromBackend = false
+            };
         }
 
         internal void AddValue<T>(T item, params object[] keys)

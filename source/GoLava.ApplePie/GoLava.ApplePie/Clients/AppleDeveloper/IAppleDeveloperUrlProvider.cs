@@ -10,6 +10,8 @@
 
         string GetApplicationDetailsUrl { get; }
 
+        string GetApplicationPrefixesUrl { get; }
+
         string UpdateApplicationUrl { get; }
 
         string GetDevicesUrl { get; }

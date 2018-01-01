@@ -30,7 +30,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            if (!context.TryGetValue(out List<Team> teams))
+            if (context.IsForceFromBackend || !context.TryGetValue(out List<Team> teams))
             {
                 var request = RestRequest.Post(new RestUri(this.UrlProvider.GetTeamsUrl));
                 var response = await this.SendAsync<Result<List<Team>>>(context, request);
@@ -45,13 +45,16 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var team = await this.GetTeamAsync(context);
+            var team = await this.GetTeamAsync(context.AsCacheContext());
             return await this.AddApplicationAsync(context, team.TeamId, addApplication, platform);
         }
 
         public async Task<Application> AddApplicationAsync(ClientContext context, string teamId, AddApplication addApplication, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
+
+            var prefixes = await this.GetApplicationPrefixesAsync(context.AsCacheContext(), teamId, platform);
+            addApplication.Prefix = prefixes.First();
 
             var uriBuilder = new AppleDeveloperRequestUriBuilder(
                 new RestUri(this.UrlProvider.AddApplicationUrl, new { platform }));
@@ -62,8 +65,11 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var response = await this.SendAsync<Result<Application>>(context, request);
             this.CheckResultForErrors(response.Content);
 
+            context.DeleteValue<List<Application>>(teamId, platform);
+
             var application = response.Content.Data;
             application.TeamId = teamId;
+
             return application;
         }
 
@@ -80,6 +86,9 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var request = RestRequest.Post(uriBuilder.ToUri());
             var response = await this.SendAsync<Result<Application>>(context, request);
             this.CheckResultForErrors(response.Content);
+
+            context.DeleteValue<List<Application>>(application.TeamId, platform);
+
             return true;
         }
 
@@ -87,7 +96,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var team = await this.GetTeamAsync(context);
+            var team = await this.GetTeamAsync(context.AsCacheContext());
             return await this.GetApplicationsAsync(context, team.TeamId, platform);
         }
 
@@ -95,13 +104,14 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            if (!context.TryGetValue(out List<Application> applications, teamId))
+            if (context.IsForceFromBackend || !context.TryGetValue(out List<Application> applications, teamId, platform))
             {
                 var applicationsResult = await this.GetApplicationsResultsAsync(context, teamId, platform);
 
                 applications = applicationsResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
                 applications.ForEach(a => a.TeamId = teamId);
-                context.AddValue(applications, teamId);
+
+                context.AddValue(applications, teamId, platform);
             }
             return applications;
         }
@@ -110,7 +120,8 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            if (!context.TryGetValue(out ApplicationDetails applicationDetails, application.TeamId, application.Id))
+            if (context.IsForceFromBackend 
+                || !context.TryGetValue(out ApplicationDetails applicationDetails, application.TeamId, application.Id, platform))
             {
                 var uriBuilder = new AppleDeveloperRequestUriBuilder(
                     new RestUri(this.UrlProvider.GetApplicationDetailsUrl, new { platform }));
@@ -122,9 +133,11 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 });
                 var response = await this.SendAsync<Result<ApplicationDetails>>(context, request);
                 this.CheckResultForErrors(response.Content);
+
                 applicationDetails = response.Content.Data;
                 applicationDetails.TeamId = application.TeamId;
-                context.AddValue(applicationDetails, application.TeamId, application.Id);
+
+                context.AddValue(applicationDetails, application.TeamId, application.Id, platform);
             }
             return applicationDetails;
         }
@@ -147,10 +160,9 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             if (value.Equals(originalValue))
                 return applicationDetails;
 
-            var valueType = typeof(TFeatureValue);
             var jsonProperty = property.GetCustomAttribute<JsonPropertyAttribute>();
             var featureType = jsonProperty?.PropertyName ?? _resolver.GetResolvedPropertyName(property.Name);
-            var featureValue = valueType == typeof(bool)
+            var featureValue = typeof(TFeatureValue) == typeof(bool)
                 ? ((bool)(object)value ? "yes" : "no")
                 : value.ToString();
 
@@ -175,7 +187,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var team = await this.GetTeamAsync(context);
+            var team = await this.GetTeamAsync(context.AsCacheContext());
             return await this.GetDevicesAsync(context, team.TeamId, platform);
         }
 
@@ -183,14 +195,14 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            if (!context.TryGetValue(out List<Device> devices, teamId))
+            if (context.IsForceFromBackend || !context.TryGetValue(out List<Device> devices, teamId, platform))
             {
                 var devicesResult = await this.GetDevicesResultsAsync(context, teamId, platform);
 
                 devices = devicesResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
                 devices.ForEach(d => d.TeamId = teamId);
 
-                context.AddValue(devices, teamId);
+                context.AddValue(devices, teamId, platform);
             }
             return devices;
         }
@@ -221,7 +233,9 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var request = RestRequest.Post(uriBuilder.ToUri());
             var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
-            context.DeleteValue<PageResult<Device>>(device.TeamId);
+
+            context.DeleteValue<List<Device>>(device.TeamId, platform);
+
             return true;
         }
 
@@ -239,7 +253,9 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var request = RestRequest.Post(uriBuilder.ToUri());
             var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
-            context.DeleteValue<PageResult<Device>>(device.TeamId);
+
+            context.DeleteValue<List<Device>>(device.TeamId, platform);
+
             return response.Content.Data;
         }
 
@@ -258,7 +274,9 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             });
             var response = await this.SendAsync<Result<Device>>(context, request);
             this.CheckResultForErrors(response.Content);
-            context.DeleteValue<PageResult<Device>>(device.TeamId);
+
+            context.DeleteValue<List<Device>>(device.TeamId, platform);
+
             return response.Content.Data;
         }
 
@@ -273,7 +291,9 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, newDevices);
             var response = await this.SendAsync<Result<List<Device>>>(context, request);
             this.CheckResultForErrors(response.Content);
-            context.DeleteValue<PageResult<Device>>(teamId);
+
+            context.DeleteValue<List<Device>>(teamId, platform);
+
             return response.Content;
         }
 
@@ -289,6 +309,24 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 }
             );
             return applicationsResult;
+        }
+
+        private async Task<List<string>> GetApplicationPrefixesAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            if (context.IsForceFromBackend || !context.TryGetValue(out List<string> prefixes, teamId, platform))
+            {
+                var request = RestRequest.Post(
+                    new RestUri(this.UrlProvider.GetApplicationPrefixesUrl, new { platform }),
+                    RestContentType.FormUrlEncoded, new { teamId });
+                var response = await this.SendAsync<ApplicationPrefixes>(context, request);
+                this.CheckResultForErrors(response.Content);
+
+                prefixes = response.Content.AppIdPrefixes;
+                context.AddValue(prefixes, teamId, platform);
+            }
+            return prefixes;
         }
 
         private async Task<List<PageResult<Device>>> GetDevicesResultsAsync(ClientContext context, string teamId, Platform platform)
