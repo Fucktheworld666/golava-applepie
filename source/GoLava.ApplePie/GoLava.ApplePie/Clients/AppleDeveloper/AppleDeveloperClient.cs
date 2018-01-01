@@ -17,6 +17,9 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
     {
         private readonly CustomPropertyNamesContractResolver _resolver = new CustomPropertyNamesContractResolver();
 
+        public AppleDeveloperClient()
+            : this(new AppleDeveloperUrlProvider()) { }
+
         public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider)
                 : base(urlProvider) { }
 
@@ -38,6 +41,14 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return teams;
         }
 
+        public async Task<Application> AddApplicationAsync(ClientContext context, AddApplication addApplication, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var team = await this.GetTeamAsync(context);
+            return await this.AddApplicationAsync(context, team.TeamId, addApplication, platform);
+        }
+
         public async Task<Application> AddApplicationAsync(ClientContext context, string teamId, AddApplication addApplication, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
@@ -51,6 +62,11 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var response = await this.SendAsync<Result<Application>>(context, request);
             this.CheckResultForErrors(response.Content);
             return response.Content.Data;
+        }
+
+        public Task<bool> DeleteApplicationAsync(ClientContext context, Application application, Platform platform = Platform.Ios)
+        {
+            return this.DeleteApplicationAsync(context, application.Prefix, application, platform);
         }
 
         public async Task<bool> DeleteApplicationAsync(ClientContext context, string teamId, Application application, Platform platform = Platform.Ios)
@@ -69,6 +85,14 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return true;
         }
 
+        public async Task<List<Application>> GetApplicationsAsync(ClientContext context, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var team = await this.GetTeamAsync(context);
+            return await this.GetApplicationsAsync(context, team.TeamId, platform);
+        }
+
         public async Task<List<Application>> GetApplicationsAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
@@ -79,6 +103,11 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 context.AddValue(applicationsResult, teamId);
             }
             return applicationsResult.Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
+        }
+
+        public Task<ApplicationDetails> GetApplicationDetails(ClientContext context, Application application, Platform platform = Platform.Ios)
+        {
+            return this.GetApplicationDetails(context, application.Prefix, application, platform);
         }
 
         public async Task<ApplicationDetails> GetApplicationDetails(ClientContext context, string teamId, Application application, Platform platform = Platform.Ios)
@@ -101,6 +130,13 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 context.AddValue(applicationDetails, teamId, application.Id);
             }
             return applicationDetails;
+        }
+
+        public Task<ApplicationDetails> UpdateApplicationFeatureAsync<TFeatureValue>(
+            ClientContext context, ApplicationDetails applicationDetails,
+            Expression<Func<ApplicationFeatures, TFeatureValue>> feature, TFeatureValue value, Platform platform = Platform.Ios)
+        {
+            return this.UpdateApplicationFeatureAsync(context, applicationDetails.Prefix, applicationDetails, feature, value, platform);
         }
 
         public async Task<ApplicationDetails> UpdateApplicationFeatureAsync<TFeatureValue>(
@@ -143,6 +179,14 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             property.SetValue(applicationDetails.Features, value);
 
             return applicationDetails;
+        }
+
+        public async Task<List<Device>> GetDevicesAsync(ClientContext context, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var team = await this.GetTeamAsync(context);
+            return await this.GetDevicesAsync(context, team.TeamId, platform);
         }
 
         public async Task<List<Device>> GetDevicesAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
@@ -266,6 +310,22 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 }
             );
             return devicesResult;
+        }
+
+        private async Task<Team> GetTeamAsync(ClientContext context)
+        {
+            await Configure.AwaitFalse();
+
+            var teams = await this.GetTeamsAsync(context);
+            if (teams == null || teams.Count == 0)
+                throw new ApplePieException(""); // todo
+
+            if (teams.Count > 1)
+            {
+                // todo: logo
+            }
+
+            return teams[0];
         }
 
         private async Task<List<TPageResult>> SendPageRequestAsync<TPageResult>(
