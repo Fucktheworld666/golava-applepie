@@ -61,6 +61,9 @@ namespace GoLava.ApplePie.Contracts.AppleDeveloper
             }
         }
 
+        /// <summary>
+        /// Gets or sets the prefix of the application.
+        /// </summary>
         internal string Prefix { get; set; }
     }
 }
