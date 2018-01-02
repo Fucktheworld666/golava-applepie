@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Transfer;
 using RichardSzalay.MockHttp;
@@ -16,7 +17,7 @@ namespace GoLava.ApplePie.Tests.Transfer
             var mockHttp = new MockHttpMessageHandler();
             mockHttp
                 .Expect("http://domain.ext/")
-                .Respond("application/json", json); // Respond with JSON
+                .Respond("application/json", json);
 
             var restClient = new RestClient(mockHttp);
             var context = new RestClientContext();
@@ -35,12 +36,13 @@ namespace GoLava.ApplePie.Tests.Transfer
         [Fact]
         public async Task CookiesAreHandeledCorrectly()
         {
+            var res = new HttpResponseMessage(HttpStatusCode.OK);
+            res.Headers.TryAddWithoutValidation("set-cookie", "hello=world");
+
             var mockHttp = new MockHttpMessageHandler();
             mockHttp
                 .Expect("http://domain.ext/")
-                .WithHeaders("set-cookie", "hello=world")
-                .Respond("application/json", "{'foo' : 'Bar'}"); // Respond with JSON
-
+                .Respond(req => res);
             var restClient = new RestClient(mockHttp);
             var context = new RestClientContext();
             var request = RestRequest.Get(new RestUri("http://domain.ext/"));

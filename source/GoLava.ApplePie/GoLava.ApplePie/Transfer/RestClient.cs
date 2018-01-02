@@ -85,20 +85,23 @@ namespace GoLava.ApplePie.Transfer
         {
             await Configure.AwaitFalse();
 
-            var rawContent = await httpResponse.Content.ReadAsStringAsync();
-
             var restResponse = new RestResponse<TContent>
             {
                 StatusCode = httpResponse.StatusCode,
-                RawContent = rawContent,
-                Headers = new RestHeaders(httpResponse.Headers),
-                ContentType = ConvertContentType(httpResponse.Content.Headers)
+                Headers = new RestHeaders(httpResponse.Headers)
             };
+
+            var httpContent = httpResponse.Content;
+            if (httpContent != null)
+            {
+                restResponse.RawContent = await httpContent.ReadAsStringAsync();
+                restResponse.ContentType = ConvertContentType(httpContent.Headers);
+            }
             if (httpResponse.IsSuccessStatusCode)
             {
                 if (restResponse.ContentType == RestContentType.Json)
                 {
-                    var content = this.Serializer.Deserialize<TContent>(rawContent);
+                    var content = this.Serializer.Deserialize<TContent>(restResponse.RawContent);
                     restResponse.Content = content;
                 }
 
