@@ -27,4 +27,7 @@
     <Folder Include="Serializers\" />
     <Folder Include="Clients\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="GoLava.ApplePie.Tests.nuspec" />
+  </ItemGroup>
 </Project>
