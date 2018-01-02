@@ -34,6 +34,44 @@ namespace GoLava.ApplePie.Tests.Transfer
         }
 
         [Fact]
+        public async Task UserAgentIsSetCorrectly()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp
+                .Expect("http://domain.ext/")
+                .WithHeaders("user-agent", "GoLava/1.0")
+                .Respond("application/json", "{'foo' : 'Bar'}");
+
+            var restClient = new RestClient(mockHttp);
+            var context = new RestClientContext();
+            var request = RestRequest.Get(new RestUri("http://domain.ext/"));
+            var response = await restClient.SendAsync<Contract>(context, request);
+
+            Assert.True(response.IsSuccess);
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task HostIsSetCorrectly()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp
+                .Expect("http://domain.ext/")
+                .WithHeaders("host", "domain.ext")
+                .Respond("application/json", "{'foo' : 'Bar'}");
+
+            var restClient = new RestClient(mockHttp);
+            var context = new RestClientContext();
+            var request = RestRequest.Get(new RestUri("http://domain.ext/"));
+            var response = await restClient.SendAsync<Contract>(context, request);
+
+            Assert.True(response.IsSuccess);
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task CookiesAreHandeledCorrectly()
         {
             var res = new HttpResponseMessage(HttpStatusCode.OK);
