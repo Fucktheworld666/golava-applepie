@@ -13,6 +13,12 @@ namespace GoLava.ApplePie.Serializers
         /// <summary>
         /// Initializes a new instance of the <see cref="T:JsonSerializer"/> class.
         /// </summary>
+        public JsonSerializer()
+            : this(new JsonSerializerSettings()) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:JsonSerializer"/> class.
+        /// </summary>
         /// <param name="settings">An instance of <see cref="T:JsonSerializerSettings"/> to 
         /// be used when serializing/deserializing.</param>
         public JsonSerializer(JsonSerializerSettings settings)

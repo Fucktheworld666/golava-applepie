@@ -24,5 +24,6 @@
     <Folder Include="Transfer\Content\" />
     <Folder Include="Transfer\Resolvers\" />
     <Folder Include="Threading\" />
+    <Folder Include="Serializers\" />
   </ItemGroup>
 </Project>
