@@ -39,12 +39,24 @@ namespace GoLava.ApplePie.Transfer.Content
             var list = new List<KeyValuePair<string, string>>();
 
             var parametersType = content.GetType();
-            foreach (var property in parametersType.GetProperties())
+            foreach (var property in parametersType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
-                var value = ConvertValue(property.GetMethod.Invoke(content, null));
+                // skip properties with a JsonIgnoreAttribute attribute
+                var jsonIgnoreAttribute = property.GetCustomAttribute<JsonIgnoreAttribute>();
+                if (jsonIgnoreAttribute != null)
+                    continue;
+
+                // check for public and internal getters
+                var getMethod = property.GetMethod;
+                if (!(getMethod.IsPublic || getMethod.IsAssembly))
+                    continue;
+
+                // skip null values
+                var value = ConvertValue(getMethod.Invoke(content, null));
                 if (value == null)
                     continue;
-                
+
+                // detect the right name
                 string name;
 
                 var formDataPropertyAttribute = property.GetCustomAttribute<FormDataPropertyAttribute>();
