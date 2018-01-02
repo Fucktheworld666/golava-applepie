@@ -97,6 +97,7 @@ namespace GoLava.ApplePie.Clients
             {
                 Authentication = this.Authentication,
                 AuthToken = this.AuthToken,
+                CookieJar = this.CookieJar,
                 LogonAuth = this.LogonAuth,
                 TwoStepToken = this.TwoStepToken,
                 Session = this.Session,
@@ -115,6 +116,7 @@ namespace GoLava.ApplePie.Clients
             {
                 Authentication = this.Authentication,
                 AuthToken = this.AuthToken,
+                CookieJar = this.CookieJar,
                 LogonAuth = this.LogonAuth,
                 TwoStepToken = this.TwoStepToken,
                 Session = this.Session,
