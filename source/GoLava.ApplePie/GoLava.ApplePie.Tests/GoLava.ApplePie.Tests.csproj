@@ -26,6 +26,7 @@
     <Folder Include="Threading\" />
     <Folder Include="Serializers\" />
     <Folder Include="Clients\" />
+    <Folder Include="Clients\AppleDeveloper\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="GoLava.ApplePie.Tests.nuspec" />
