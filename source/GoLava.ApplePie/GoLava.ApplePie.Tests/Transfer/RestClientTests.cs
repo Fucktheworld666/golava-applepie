@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Transfer;
@@ -53,6 +54,25 @@ namespace GoLava.ApplePie.Tests.Transfer
         }
 
         [Fact]
+        public async Task ConnectionKeepAliveSetCorrectly()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp
+                .Expect("http://domain.ext/")
+                .WithHeaders("connection", "keep-alive")
+                .Respond("application/json", "{'foo' : 'Bar'}");
+
+            var restClient = new RestClient(mockHttp);
+            var context = new RestClientContext();
+            var request = RestRequest.Get(new RestUri("http://domain.ext/"));
+            var response = await restClient.SendAsync<Contract>(context, request);
+
+            Assert.True(response.IsSuccess);
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task HostIsSetCorrectly()
         {
             var mockHttp = new MockHttpMessageHandler();
@@ -63,6 +83,27 @@ namespace GoLava.ApplePie.Tests.Transfer
 
             var restClient = new RestClient(mockHttp);
             var context = new RestClientContext();
+            var request = RestRequest.Get(new RestUri("http://domain.ext/"));
+            var response = await restClient.SendAsync<Contract>(context, request);
+
+            Assert.True(response.IsSuccess);
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task CookieIsSetCorrectly()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp
+                .Expect("http://domain.ext/")
+                .WithHeaders("cookie", "foo=bar; hello=world")
+                .Respond("application/json", "{'foo' : 'Bar'}");
+
+            var restClient = new RestClient(mockHttp);
+            var context = new RestClientContext();
+            context.CookieJar.Add(new Uri("http://domain.ext/"), new Cookie("foo", "bar"));
+            context.CookieJar.Add(new Uri("http://domain.ext/"), new Cookie("hello", "world"));
             var request = RestRequest.Get(new RestUri("http://domain.ext/"));
             var response = await restClient.SendAsync<Contract>(context, request);
 
