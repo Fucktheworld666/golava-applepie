@@ -120,7 +120,7 @@ namespace GoLava.ApplePie.Transfer
         /// Tries to retrieve a set of values stored under the given key 
         /// within this <see cref="T:RestHeaders"/> instance.
         /// </summary>
-        /// <returns><c>true</c>, if values where successfully retrieved, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c>, if set of values was successfully retrieved, <c>false</c> otherwise.</returns>
         /// <param name="key">The key that is used to retrieve the set of values.</param>
         /// <param name="values">A reference to the set of values.</param>
         public bool TryGetValue(string key, out ISet<string> values)
@@ -129,6 +129,25 @@ namespace GoLava.ApplePie.Transfer
                 throw new ArgumentNullException(nameof(key));
 
             return _container.TryGetValue(key, out values);
+        }
+
+        /// <summary>
+        /// Tries to retrieve a single value stored under the given key 
+        /// within this <see cref="T:RestHeaders"/> instance.
+        /// </summary>
+        /// <returns><c>true</c>, if value was successfully retrieved, <c>false</c> otherwise.</returns>
+        /// <param name="key">The key that is used to retrieve the value.</param>
+        /// <param name="value">A reference to the value.</param>
+        public bool TryGetValue(string key, out string value)
+        {
+            if (this.TryGetValue(key, out ISet<string> values) && values?.Count == 1)
+            {
+                value = values.First();
+                return true;
+            }
+
+            value = default(string);
+            return false;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

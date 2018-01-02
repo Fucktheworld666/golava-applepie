@@ -331,15 +331,15 @@ namespace GoLava.ApplePie.Clients
 
         private CsrfToken GetCsrfToken<TContent>(RestResponse<TContent> response, CsrfClass csrfClass)
         {
-            if (!response.Headers.TryGetValue("csrf", out ISet<string> csrfValues) || csrfValues.Count != 1)
+            if (!response.Headers.TryGetValue("csrf", out string csrfValue))
                 return null;
-            if (!response.Headers.TryGetValue("csrf_ts", out ISet<string> csrfTsValues) || csrfTsValues.Count != 1)
+            if (!response.Headers.TryGetValue("csrf_ts", out string csrfTsValue))
                 return null;
 
             var csrfToken = new CsrfToken
             {
-                Timestamp = csrfTsValues.First(),
-                Value = csrfValues.First(),
+                Timestamp = csrfTsValue,
+                Value = csrfValue,
                 Class = csrfClass
             };
             return csrfToken;
@@ -347,15 +347,15 @@ namespace GoLava.ApplePie.Clients
 
         private TwoStepToken GetTwoStepToken<TContent>(RestResponse<TContent> response)
         {
-            if (!response.Headers.TryGetValue("x-apple-id-session-id", out ISet<string> sessionIdValues) || sessionIdValues.Count != 1)
+            if (!response.Headers.TryGetValue("x-apple-id-session-id", out string sessionIdValue))
                 return null;
-            if (!response.Headers.TryGetValue("scnt", out ISet<string> scntValues) || scntValues.Count != 1)
+            if (!response.Headers.TryGetValue("scnt", out string scntValue))
                 return null;
 
             var twoStepToken = new TwoStepToken
             {
-                Scnt = scntValues.First(),
-                SessionId = sessionIdValues.First()
+                Scnt = scntValue,
+                SessionId = sessionIdValue
             };
             return twoStepToken;
         }
