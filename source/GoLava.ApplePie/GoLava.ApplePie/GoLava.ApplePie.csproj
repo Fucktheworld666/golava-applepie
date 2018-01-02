@@ -21,6 +21,7 @@
     <Folder Include="Transfer\Resolvers\" />
     <Folder Include="Extensions\" />
     <Folder Include="Serializers\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

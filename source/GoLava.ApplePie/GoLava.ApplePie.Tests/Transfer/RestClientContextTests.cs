@@ -62,8 +62,15 @@ namespace GoLava.ApplePie.Tests.Transfer
 
             Assert.Equal("foo1", cookies[0].Name);
             Assert.Equal("bar", cookies[0].Value);
+            Assert.Equal("", cookies[0].Comment);
+            Assert.False(cookies[0].HttpOnly);
+            Assert.False(cookies[0].Secure);
+
             Assert.Equal("foo2", cookies[1].Name);
             Assert.Equal("bar", cookies[1].Value);
+            Assert.Equal("hello world", cookies[1].Comment);
+            Assert.True(cookies[1].HttpOnly);
+            Assert.True(cookies[1].Secure);
         }
 
         private Cookie SetTimestamp(Cookie cookie, DateTime timeStamp)

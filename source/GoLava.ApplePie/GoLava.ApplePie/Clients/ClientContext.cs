@@ -34,7 +34,7 @@ namespace GoLava.ApplePie.Clients
         /// <summary>
         /// Gets or sets the value of the current authentication state.
         /// </summary>
-        public Authentication Authentication { get; set; }
+        public Authentication Authentication { get; set; } = Authentication.None;
 
         /// <summary>
         /// Gets or sets the auth token to be used during authenication calls.

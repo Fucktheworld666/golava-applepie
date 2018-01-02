@@ -6,6 +6,10 @@
     public enum Authentication
     {
         /// <summary>
+        /// A value indicating that no authentication 
+        /// </summary>
+        None,
+        /// <summary>
         /// A value indicating that authentication was successful.
         /// </summary>
         Success,
