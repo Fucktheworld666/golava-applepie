@@ -8,6 +8,8 @@ namespace GoLava.ApplePie.Transfer
     /// </summary>
     public class RestClientContext
     {
+        private CookieJar _cookieJar;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:RestClientContext"/> class.
         /// </summary>
@@ -17,8 +19,12 @@ namespace GoLava.ApplePie.Transfer
         }
 
         /// <summary>
-        /// Gets the <see cref="T:CookieJar"/> associated with this <see cref="T:RestClientContext"/>.
+        /// Gets or sets the <see cref="T:CookieJar"/> associated with this <see cref="T:RestClientContext"/>.
         /// </summary>
-        public CookieJar CookieJar { get; }
+        public CookieJar CookieJar
+        {
+            get { return _cookieJar; }
+            set { _cookieJar = value ?? new CookieJar(); }
+        }
     }
 }

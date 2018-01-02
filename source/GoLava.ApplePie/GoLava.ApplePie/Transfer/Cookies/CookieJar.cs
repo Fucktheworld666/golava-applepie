@@ -14,6 +14,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
     public partial class CookieJar : IEnumerable<DomainCookies>
     {
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>> _store;
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>> _secureStore;
         private readonly CookieParser _cookieParser;
 
         /// <summary>
@@ -22,6 +23,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
         public CookieJar()
         {
             _store = new ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>>(StringComparer.OrdinalIgnoreCase);
+            _secureStore = new ConcurrentDictionary<string, ConcurrentDictionary<string, Cookie>>(StringComparer.OrdinalIgnoreCase);
             _cookieParser = new CookieParser();
         }
 
@@ -44,8 +46,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
                 throw new ArgumentNullException(nameof(cookie));
 
             var domain = EnsureDomain(uri, cookie);
-            var cookies = _store.GetOrAdd(domain, x => this.CreateCookieDictionary());
-            cookies.AddOrUpdate(cookie.Name, cookie, (k, c) => cookie);
+            this.AddDomainCookie(domain, cookie);
         }
 
         /// <summary>
@@ -71,6 +72,7 @@ namespace GoLava.ApplePie.Transfer.Cookies
         public void Clear()
         {
             _store.Clear();
+            _secureStore.Clear();
         }
 
         /// <summary>
@@ -83,15 +85,28 @@ namespace GoLava.ApplePie.Transfer.Cookies
             if (uri == null)
                 throw new ArgumentNullException(nameof(uri));
 
-            var collection = new CookieCollection();
+            var dictionary = new Dictionary<string, Cookie>();
+
             foreach (var subDomain in GetDomainParts(uri))
             {
                 if (_store.TryGetValue(subDomain, out ConcurrentDictionary<string, Cookie> cookies))
                 {
                     foreach (var cookie in cookies.Values)
-                        collection.Add(cookie);
+                        dictionary[cookie.Name] = cookie;
+                }
+
+                if (uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (_secureStore.TryGetValue(subDomain, out cookies))
+                    {
+                        foreach (var cookie in cookies.Values)
+                            dictionary[cookie.Name] = cookie;
+                    }
                 }
             }
+            var collection = new CookieCollection();
+            foreach (var cookie in dictionary.Values.OrderBy(c => c.Name))
+                collection.Add(cookie);
             return collection;
         }
 
@@ -105,14 +120,22 @@ namespace GoLava.ApplePie.Transfer.Cookies
         {
             var sb = new StringBuilder();
             foreach (var cookie in this.GetCookies(uri).Cast<Cookie>()
-                     .Where(c => !string.IsNullOrWhiteSpace(c.Name))
-                     .OrderBy(c => c.Name))
+                     .Where(c => !string.IsNullOrWhiteSpace(c.Name)))
             {
                 if (sb.Length > 0)
                     sb.Append("; ");
                 sb.AppendFormat("{0}={1}", cookie.Name, cookie.Value);
             }
             return sb.ToString();
+        }
+
+        private void AddDomainCookie(string domain, Cookie cookie)
+        {
+            var cookies = (cookie.Secure ? _secureStore : _store).GetOrAdd(domain, x => this.CreateCookieDictionary());
+            if (cookie.Expired)
+                cookies.TryRemove(cookie.Name, out Cookie ignored);
+            else
+                cookies.AddOrUpdate(cookie.Name, cookie, (k, c) => cookie);
         }
 
         private void Assign(IEnumerable<DomainCookies> domainCookiesCollection)
@@ -125,10 +148,8 @@ namespace GoLava.ApplePie.Transfer.Cookies
                 if (!domainCookies.Domain.StartsWith(".", StringComparison.InvariantCulture))
                     throw new ArgumentException("Domain must start with a dot.", nameof(domainCookiesCollection));
 
-                var cookies = this.CreateCookieDictionary();
                 foreach (var cookie in domainCookies.Cookies)
-                    cookies.AddOrUpdate(cookie.Name, cookie, (k, c) => cookie);
-                _store[domainCookies.Domain] = cookies;
+                    this.AddDomainCookie(domainCookies.Domain, cookie);
             }
         }
 
@@ -166,12 +187,12 @@ namespace GoLava.ApplePie.Transfer.Cookies
 
         IEnumerator<DomainCookies> IEnumerable<DomainCookies>.GetEnumerator()
         {
-            return new CookieJarEnumerator(_store);
+            return new CookieJarEnumerator(_store, _secureStore);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new CookieJarEnumerator(_store);
+            return new CookieJarEnumerator(_store, _secureStore);
         }
     }
 }

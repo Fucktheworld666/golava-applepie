@@ -23,6 +23,9 @@ namespace GoLava.ApplePie.Clients
             _stash = new ConcurrentDictionary<string, object>();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:ClientContext"/> class.
+        /// </summary>
         private ClientContext(ConcurrentDictionary<string, object> stash)
         {
             _stash = stash;
