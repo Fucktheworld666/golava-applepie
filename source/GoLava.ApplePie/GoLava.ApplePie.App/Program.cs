@@ -79,7 +79,7 @@ namespace GoLava.ApplePie.App
                         }
                     }
 
-                    var newApplication = await appleDeveloperClient.AddApplicationAsync(context, team.TeamId, new AddApplication
+                    var newApplication = await appleDeveloperClient.AddApplicationAsync(context, team.TeamId, new NewApplication
                     {
                         Passbook = true,
                         HealthKit = true,

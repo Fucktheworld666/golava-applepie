@@ -41,7 +41,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return teams;
         }
 
-        public async Task<Application> AddApplicationAsync(ClientContext context, AddApplication addApplication, Platform platform = Platform.Ios)
+        public async Task<Application> AddApplicationAsync(ClientContext context, NewApplication addApplication, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
@@ -49,19 +49,19 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return await this.AddApplicationAsync(context, team.TeamId, addApplication, platform);
         }
 
-        public async Task<Application> AddApplicationAsync(ClientContext context, string teamId, AddApplication addApplication, Platform platform = Platform.Ios)
+        public async Task<Application> AddApplicationAsync(ClientContext context, string teamId, NewApplication newApplication, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
 
             var prefixes = await this.GetApplicationPrefixesAsync(context.AsCacheContext(), teamId, platform);
-            addApplication.Prefix = prefixes.First();
+            newApplication.Prefix = prefixes.First();
 
             var uriBuilder = new AppleDeveloperRequestUriBuilder(
                 new RestUri(this.UrlProvider.AddApplicationUrl, new { platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
                 { "teamId", teamId }
             });
-            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, addApplication);
+            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, newApplication);
             var response = await this.SendAsync<Result<Application>>(context, request);
             this.CheckResultForErrors(response.Content);
 
