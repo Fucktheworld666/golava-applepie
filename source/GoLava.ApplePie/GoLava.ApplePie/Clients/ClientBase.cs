@@ -53,10 +53,15 @@ namespace GoLava.ApplePie.Clients
                     context.Authentication = Authentication.TwoStepSelectTrustedDevice;    
                 }
             }
+            catch (ApplePieCredentialsException)
+            {
+                // todo log exception
+                context.Authentication = Authentication.FailedWithInvalidCredentials;
+            }
             catch (ApplePieException)
             {
                 // todo log exception
-                context.Authentication = Authentication.Failed;
+                context.Authentication = Authentication.FailedUnexpected;
             }
             return context;
         }
@@ -93,7 +98,7 @@ namespace GoLava.ApplePie.Clients
                 {
                     var logonAuth = context.LogonAuth;
                     context.Authentication = logonAuth != null && logonAuth.TrustedDevices != null && logonAuth.TrustedDevices.Count > 0 
-                        ? Authentication.TwoStepSelectTrustedDevice : Authentication.Failed;
+                        ? Authentication.TwoStepSelectTrustedDevice : Authentication.FailedNoTrustedDeviceFound;
                 }
                 return context;
             }
@@ -154,7 +159,7 @@ namespace GoLava.ApplePie.Clients
                 switch (apre.Response.StatusCode)
                 {
                     case HttpStatusCode.Forbidden:
-                        throw new ApplePieException($"Invalid username and password combination. Used '{username}' as the username.", apre);
+                        throw new ApplePieCredentialsException($"Invalid username and password combination. Used '{username}' as the username.", apre);
 
                     case HttpStatusCode.Conflict:
                         return await this.HandleTwoStepAuthenticationAsync(context, apre.Response);

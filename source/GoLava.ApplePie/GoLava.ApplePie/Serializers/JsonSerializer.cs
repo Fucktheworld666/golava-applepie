@@ -14,7 +14,7 @@ namespace GoLava.ApplePie.Serializers
         /// Initializes a new instance of the <see cref="T:JsonSerializer"/> class.
         /// </summary>
         public JsonSerializer()
-            : this(new JsonSerializerSettings()) { }
+            : this(CreateJsonSerializerSettings()) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:JsonSerializer"/> class.
@@ -44,6 +44,14 @@ namespace GoLava.ApplePie.Serializers
         public string Serialize(object data)
         {
             return JsonConvert.SerializeObject(data, _jsonSerializerSettings);
+        }
+
+        private static JsonSerializerSettings CreateJsonSerializerSettings()
+        {
+            return new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
         }
     }
 }

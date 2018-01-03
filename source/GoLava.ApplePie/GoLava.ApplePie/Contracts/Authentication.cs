@@ -14,10 +14,6 @@
         /// </summary>
         Success,
         /// <summary>
-        ///  A value indicating that authentication has failed.
-        /// </summary>
-        Failed,
-        /// <summary>
         ///  A value indicating that a trusted device needs to be 
         /// selected for two-step authentication.
         /// </summary>
@@ -26,6 +22,28 @@
         ///  A value indicating that the authentication code has to be provided
         /// to verify the two-step authentication.
         /// </summary>
-        TwoStepCode
+        TwoStepCode,
+        /// <summary>
+        ///  A value indicating that authentication has failed with invalid credentials.
+        /// </summary>
+        FailedWithInvalidCredentials,
+        /// <summary>
+        ///  A value indicating that authentication has failed unexpected.
+        /// </summary>
+        FailedUnexpected,
+        /// <summary>
+        /// A value indicating that authentication has failed because no trusted device was found.
+        /// </summary>
+        FailedNoTrustedDeviceFound,
+    }
+
+    public static class AuthenticationExtensions
+    {
+        public static bool HasFailed(this Authentication authentication)
+        {
+            return authentication == Authentication.FailedUnexpected
+                || authentication == Authentication.FailedNoTrustedDeviceFound
+                || authentication == Authentication.FailedWithInvalidCredentials;
+        }
     }
 }

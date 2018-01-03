@@ -45,7 +45,7 @@ namespace GoLava.ApplePie.Tests.Transfer
             context.CookieJar.Add(new Uri("https://www.foo.ext"),
                 SetTimestamp(new Cookie("foo2", "bar", "/", ".foo.ext") { Secure = true, Comment = "hello world", HttpOnly = true }, timeStamp));
             var json = jsonSerializer.Serialize(context);
-            Assert.Equal("{\"CookieJar\":[{\"Domain\":\".foo.ext\",\"Cookies\":[{\"Comment\":\"\",\"CommentUri\":null,\"HttpOnly\":false,\"Discard\":false,\"Domain\":\".foo.ext\",\"Expired\":false,\"Expires\":\"0001-01-01T00:00:00\",\"Name\":\"foo1\",\"Path\":\"/\",\"Port\":\"\",\"Secure\":false,\"TimeStamp\":\"1979-12-20T01:02:03Z\",\"Value\":\"bar\",\"Version\":0}]},{\"Domain\":\".foo.ext\",\"Cookies\":[{\"Comment\":\"hello world\",\"CommentUri\":null,\"HttpOnly\":true,\"Discard\":false,\"Domain\":\".foo.ext\",\"Expired\":false,\"Expires\":\"0001-01-01T00:00:00\",\"Name\":\"foo2\",\"Path\":\"/\",\"Port\":\"\",\"Secure\":true,\"TimeStamp\":\"1979-12-20T01:02:03Z\",\"Value\":\"bar\",\"Version\":0}]}]}", json);
+            Assert.Equal("{\"CookieJar\":[{\"Domain\":\".foo.ext\",\"Cookies\":[{\"Comment\":\"\",\"HttpOnly\":false,\"Discard\":false,\"Domain\":\".foo.ext\",\"Expired\":false,\"Expires\":\"0001-01-01T00:00:00\",\"Name\":\"foo1\",\"Path\":\"/\",\"Port\":\"\",\"Secure\":false,\"TimeStamp\":\"1979-12-20T01:02:03Z\",\"Value\":\"bar\",\"Version\":0}]},{\"Domain\":\".foo.ext\",\"Cookies\":[{\"Comment\":\"hello world\",\"HttpOnly\":true,\"Discard\":false,\"Domain\":\".foo.ext\",\"Expired\":false,\"Expires\":\"0001-01-01T00:00:00\",\"Name\":\"foo2\",\"Path\":\"/\",\"Port\":\"\",\"Secure\":true,\"TimeStamp\":\"1979-12-20T01:02:03Z\",\"Value\":\"bar\",\"Version\":0}]}]}", json);
         }
 
         [Fact]

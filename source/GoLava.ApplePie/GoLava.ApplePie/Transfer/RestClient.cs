@@ -22,7 +22,7 @@ namespace GoLava.ApplePie.Transfer
             var pipeline = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                UseCookies = false
+                UseCookies = false // we handle cookies ourselves
             }.DecorateWith(new HttpClientConsoleHandler());
             return pipeline;
         }
@@ -37,8 +37,10 @@ namespace GoLava.ApplePie.Transfer
             
             _httpClient = new HttpClient(httpMessageHandler);
 
-            this.Serializer = new Serializers.JsonSerializer(new JsonSerializerSettings {
-                ContractResolver = new CustomPropertyNamesContractResolver()
+            this.Serializer = new Serializers.JsonSerializer(new JsonSerializerSettings 
+            {
+                ContractResolver = new CustomPropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore
             });
         }
 
