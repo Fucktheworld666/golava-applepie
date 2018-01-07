@@ -115,7 +115,9 @@ namespace GoLava.ApplePie.Tests.Clients
             Assert.Equal(Expected_Session_User_FullName, context.Session.User.FullName);
         }
 
-        protected async Task<ClientContext> AcquireTwoStepCodeAsync(TrustedDevice trustedDevice)
+        protected abstract ClientBase<TUrlProvider> CreateClient(RestClient restClient, TUrlProvider urlProvider);
+
+        private async Task<ClientContext> AcquireTwoStepCodeAsync(TrustedDevice trustedDevice)
         {
             var context = new ClientContext
             {
@@ -132,7 +134,7 @@ namespace GoLava.ApplePie.Tests.Clients
             };
 
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp = this.AddSecurityCodeExpectation(mockHttp, trustedDevice, null);
+            this.AddSecurityCodeExpectation(mockHttp, trustedDevice, null);
 
             var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
             context = await client.AcquireTwoStepCodeAsync(context, trustedDevice);
@@ -142,11 +144,11 @@ namespace GoLava.ApplePie.Tests.Clients
             return context;
         }
 
-        protected async Task<ClientContext> LogonWithInvalidCredentialsAsync(string username, string password)
+        private async Task<ClientContext> LogonWithInvalidCredentialsAsync(string username, string password)
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp = this.AddAuthTokenExpectation(mockHttp);
-            mockHttp = this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.Forbidden, null);
+            this.AddAuthTokenExpectation(mockHttp);
+            this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.Forbidden, null);
 
             var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
             var context = await client.LogonWithCredentialsAsync(username, password);
@@ -156,7 +158,7 @@ namespace GoLava.ApplePie.Tests.Clients
             return context;
         }
 
-        protected async Task<ClientContext> LoginWithTwoStepCodeAsync(TrustedDevice trustedDevice, string code)
+        private async Task<ClientContext> LoginWithTwoStepCodeAsync(TrustedDevice trustedDevice, string code)
         {
             var context = new ClientContext
             {
@@ -174,7 +176,7 @@ namespace GoLava.ApplePie.Tests.Clients
             context.AddValue(trustedDevice);
 
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp = this.AddSecurityCodeExpectation(mockHttp, trustedDevice, code);
+            this.AddSecurityCodeExpectation(mockHttp, trustedDevice, code);
 
             var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
             context = await client.LogonWithTwoStepCodeAsync(context, code);
@@ -184,11 +186,11 @@ namespace GoLava.ApplePie.Tests.Clients
             return context;
         }
 
-        protected async Task<ClientContext> LogonWithValidCredentialsAsync(string username, string password)
+        private async Task<ClientContext> LogonWithValidCredentialsAsync(string username, string password)
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp = this.AddAuthTokenExpectation(mockHttp);
-            mockHttp = this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.OK, new LogonAuth 
+            this.AddAuthTokenExpectation(mockHttp);
+            this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.OK, new LogonAuth 
             { 
                 AuthType = "sa" 
             });
@@ -201,11 +203,11 @@ namespace GoLava.ApplePie.Tests.Clients
             return context;
         }
 
-        protected async Task<ClientContext> LogonWithValidCredentialsTwoStepAsync(string username, string password)
+        private async Task<ClientContext> LogonWithValidCredentialsTwoStepAsync(string username, string password)
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp = this.AddAuthTokenExpectation(mockHttp);
-            mockHttp = this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.Conflict, 
+            this.AddAuthTokenExpectation(mockHttp);
+            this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.Conflict, 
                 new LogonAuth 
                 { 
                     AuthType = "hsa"
@@ -223,9 +225,7 @@ namespace GoLava.ApplePie.Tests.Clients
             return context;
         }
 
-        protected abstract ClientBase<TUrlProvider> CreateClient(RestClient restClient, TUrlProvider urlProvider);
-
-        protected MockHttpMessageHandler AddSecurityCodeExpectation(MockHttpMessageHandler mockHttp, TrustedDevice trustedDevice, string code)
+        private void AddSecurityCodeExpectation(MockHttpMessageHandler mockHttp, TrustedDevice trustedDevice, string code)
         {
             var method = string.IsNullOrEmpty(code) ? HttpMethod.Put : HttpMethod.Post;
             var mockRequest = mockHttp
@@ -257,11 +257,9 @@ namespace GoLava.ApplePie.Tests.Clients
                         }
                     }));
             }
-
-            return mockHttp;
         }
 
-        protected MockHttpMessageHandler AddLogonExpectation(
+        private void AddLogonExpectation(
             MockHttpMessageHandler mockHttp, 
             string username, string password, 
             HttpStatusCode statusCode, LogonAuth logonAuth = null, IEnumerable<KeyValuePair<string, string>> headers = null)
@@ -320,11 +318,9 @@ namespace GoLava.ApplePie.Tests.Clients
             {
                 mockRequest.Respond(statusCode);
             }
-
-            return mockHttp;
         }
 
-        protected MockHttpMessageHandler AddAuthTokenExpectation(MockHttpMessageHandler mockHttp)
+        private void AddAuthTokenExpectation(MockHttpMessageHandler mockHttp)
         {
             mockHttp
                 .Expect(HttpMethod.Get, this.UrlProvider.AuthTokenUrl)
@@ -338,7 +334,6 @@ namespace GoLava.ApplePie.Tests.Clients
                     AuthServiceKey = Expected_AuthToken_AuthServiceKey,
                     AuthServiceUrl = Expected_AuthToken_AuthServiceUrl
                 }));
-            return mockHttp;
         }
     }
 }
