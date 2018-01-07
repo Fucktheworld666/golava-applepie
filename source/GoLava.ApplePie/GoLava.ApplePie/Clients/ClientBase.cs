@@ -284,7 +284,13 @@ namespace GoLava.ApplePie.Clients
         {
             await Configure.AwaitFalse();
 
+            var logonAuth = this.RestClient.Serializer.Deserialize<LogonAuth>(logonAuthResponse.RawContent);
+            if (!logonAuth.AuthType.Equals("hsa", StringComparison.OrdinalIgnoreCase))
+                throw new ApplePieException($"Unknown authentication type '{logonAuthResponse.Content.AuthType}'");
+
             context.TwoStepToken = this.GetTwoStepToken(logonAuthResponse);
+            if (context.TwoStepToken == null)
+                throw new ApplePieException("Failed to get two-step token.");
 
             var request = RestRequest.Get(
                 new RestUri(this.UrlProvider.TwoStepAuthUrl), this.GetTwoStepHeaders(context));
@@ -319,6 +325,12 @@ namespace GoLava.ApplePie.Clients
 
         private RestHeaders GetAuthRequestHeaders(ClientContext context)
         {
+            if (context.AuthToken == null)
+                throw new ApplePieException("No auth token set.");
+
+            if (string.IsNullOrEmpty(context.AuthToken.AuthServiceKey))
+                throw new ApplePieException("No auth token service key set.");
+
             var headers = new RestHeaders
             {
                 { "X-Apple-Widget-Key", context.AuthToken.AuthServiceKey }
@@ -328,6 +340,14 @@ namespace GoLava.ApplePie.Clients
 
         private RestHeaders GetTwoStepHeaders(ClientContext context)
         {
+            if (context.TwoStepToken == null)
+                throw new ApplePieException("No two-step token set.");
+
+            if (string.IsNullOrEmpty(context.TwoStepToken.SessionId))
+                throw new ApplePieException("No two-step token session id set.");
+            if (string.IsNullOrEmpty(context.TwoStepToken.Scnt))
+                throw new ApplePieException("No two-step token scnt set.");
+
             var headers = this.GetAuthRequestHeaders(context);
             headers.Add("X-Apple-Id-Session-Id", context.TwoStepToken.SessionId);
             headers.Add("scnt", context.TwoStepToken.Scnt);
