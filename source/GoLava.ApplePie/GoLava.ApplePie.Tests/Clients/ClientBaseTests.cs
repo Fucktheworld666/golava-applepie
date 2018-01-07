@@ -85,7 +85,7 @@ namespace GoLava.ApplePie.Tests.Clients
         }
 
         [Fact]
-        public async Task AcquireTwoStepCodeAsyncSetsAuthenticationToTwoStepCode()
+        public async Task AcquireTwoStepCodeSetsAuthenticationToTwoStepCode()
         {
             var context = await this.AcquireTwoStepCodeAsync(new TrustedDevice {
                 Id = Expected_TrustedDevice_Id
@@ -94,13 +94,25 @@ namespace GoLava.ApplePie.Tests.Clients
         }
 
         [Fact]
-        public async Task LoginWithTwoStepCodeAsyncSetsAuthenticationToSuccess()
+        public async Task LoginWithTwoStepCodeSetsAuthenticationToSuccess()
         {
             var context = await this.LoginWithTwoStepCodeAsync(new TrustedDevice
             {
                 Id = Expected_TrustedDevice_Id
             }, Expected_SecurityCode);
             Assert.Equal(Authentication.Success, context.Authentication);
+        }
+
+        [Fact]
+        public async Task LoginWithTwoStepCodeReadsSessionUser()
+        {
+            var context = await this.LoginWithTwoStepCodeAsync(new TrustedDevice
+            {
+                Id = Expected_TrustedDevice_Id
+            }, Expected_SecurityCode);
+            Assert.Equal(Expected_Session_User_Id, context.Session.User.Id);
+            Assert.Equal(Expected_Session_User_EmailAddress, context.Session.User.EmailAddress);
+            Assert.Equal(Expected_Session_User_FullName, context.Session.User.FullName);
         }
 
         protected async Task<ClientContext> AcquireTwoStepCodeAsync(TrustedDevice trustedDevice)
@@ -196,7 +208,7 @@ namespace GoLava.ApplePie.Tests.Clients
             mockHttp = this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.Conflict, 
                 new LogonAuth 
                 { 
-                    AuthType = "hsa" 
+                    AuthType = "hsa"
                 }, 
                 new Dictionary<string, string> {
                     { "x-apple-id-session-id", Expected_TwoStep_SessionId },
