@@ -34,9 +34,53 @@ namespace GoLava.ApplePie.Tests.Clients.AppleDeveloper
             var teams = await client.GetTeamsAsync(context);
 
             mockHttp.VerifyNoOutstandingExpectation();
+
+            Assert.Equal(10, teams.Count);
+            for (var i = 0; i < 0; i++)
+            {
+                var team = teams[i];
+                Assert.Equal(i, team.AdminCount);
+                Assert.Equal(i, team.MemberCount);
+                Assert.Equal(i, team.ServerCount);
+
+                Assert.Equal(Expected_Team_Name, team.Name);
+                Assert.Equal(Expected_Team_Id, team.TeamId);
+            }
         }
 
+        [Fact]
+        public async Task TeamsAreLoadedFromCache()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            var expectedTeams = new List<Team>();
 
+            var context = this.CreateClientContext();
+            context.AddValue(expectedTeams);
+
+            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider) as AppleDeveloperClient;
+            var teams = await client.GetTeamsAsync(context);
+
+            Assert.Same(expectedTeams, teams);
+        }
+
+        [Fact]
+        public async Task TeamsAreLoadedFromBackend()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            this.AddValidTeamsExpectation(mockHttp);
+
+            var expectedTeams = new List<Team>();
+
+            var context = this.CreateClientContext();
+            context.AddValue(expectedTeams);
+
+            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider) as AppleDeveloperClient;
+            var teams = await client.GetTeamsAsync(context.AsBackendContext());
+
+            mockHttp.VerifyNoOutstandingExpectation();
+
+            Assert.NotSame(expectedTeams, teams);
+        }
 
         protected override ClientBase<IAppleDeveloperUrlProvider> CreateClient(RestClient restClient, IAppleDeveloperUrlProvider urlProvider)
         {

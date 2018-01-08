@@ -7,6 +7,7 @@ using GoLava.ApplePie.Clients;
 using GoLava.ApplePie.Contracts;
 using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Transfer;
+using GoLava.ApplePie.Transfer.Resolvers;
 using RichardSzalay.MockHttp;
 using Xunit;
 
@@ -36,7 +37,11 @@ namespace GoLava.ApplePie.Tests.Clients
 
         protected TUrlProvider UrlProvider { get; }
 
-        protected JsonSerializer JsonSerializer { get; } = new JsonSerializer();
+        protected JsonSerializer JsonSerializer { get; } = new JsonSerializer(new Newtonsoft.Json.JsonSerializerSettings
+        {
+            ContractResolver = new CustomPropertyNamesContractResolver(),
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+        });
 
         [Fact]
         public async Task LogonWithInvalidCredentialsSetsAuthenticationToFailed()
