@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Contracts;
@@ -8,6 +10,8 @@ namespace GoLava.ApplePie.App
 {
     class Program
     {
+        static readonly Random Random = new Random();
+
         static void Main(string[] args) => MainAsync(args).Wait();
 
         static async Task MainAsync(string[] args)
@@ -18,7 +22,7 @@ namespace GoLava.ApplePie.App
             var accountName = Console.ReadLine();
 
             Console.WriteLine("Enter Apple Password:");
-            var password = Console.ReadLine();
+            var password = ReadPassword();
 
             var context = await appleDeveloperClient.LogonWithCredentialsAsync(accountName, password);
             Console.WriteLine("Logon: {0}", context.Authentication);
@@ -115,6 +119,44 @@ namespace GoLava.ApplePie.App
                     }*/
                 }
             }
+        }
+
+        static string ReadPassword()
+        {
+            var lengths = new Stack<int>();
+
+            var sb = new StringBuilder();
+            while (true)
+            {
+                var i = Console.ReadKey(true);
+                if (i.Key == ConsoleKey.Enter)
+                {
+                    break;
+                }
+                else if (i.Key == ConsoleKey.Backspace)
+                {
+                    if (sb.Length > 0)
+                    {
+                        sb.Remove(sb.Length - 1, 1);
+
+                        // remove the number of stars from the current position
+                        var r = lengths.Pop();
+                        while (r-- > 0)
+                            Console.Write("\b \b");
+                    }
+                }
+                else
+                {
+                    sb.Append(i.KeyChar);
+
+                    // randomize the number of * to show
+                    var r = Random.Next(1, 4); // return numbers between 1 and 3, but not 4 
+                    lengths.Push(r);
+                    while (r-- > 0)
+                        Console.Write("*");
+                }
+            }
+            return sb.ToString();
         }
     }
 }
