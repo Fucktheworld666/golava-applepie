@@ -13,7 +13,10 @@ using GoLava.ApplePie.Transfer;
 
 namespace GoLava.ApplePie.Clients
 {
-    public class ClientBase<TUrlProvider>
+    /// <summary>
+    /// The base for all apple related clients.
+    /// </summary>
+    public abstract class ClientBase<TUrlProvider>
         where TUrlProvider: IUrlProvider
     {
         private readonly NamedFormatter _namedFormatter;
@@ -33,6 +36,12 @@ namespace GoLava.ApplePie.Clients
 
         protected TUrlProvider UrlProvider { get; }
 
+        /// <summary>
+        /// Uses username and password to logon.
+        /// </summary>
+        /// <returns>Returns a <see cref="T:ClientContext"/> to be used with all following client calls.</returns>
+        /// <param name="username">The username to use when logging on.</param>
+        /// <param name="password">The password to use when logging on..</param>
         public Task<ClientContext> LogonWithCredentialsAsync(string username, string password)
         {
             return this.LogonWithCredentialsAsync(new NonSecureCredentials
@@ -42,6 +51,12 @@ namespace GoLava.ApplePie.Clients
             });
         }
 
+        /// <summary>
+        /// Uses username and password to logon.
+        /// </summary>
+        /// <returns>Returns a <see cref="T:ClientContext"/> to be used with all following client calls.</returns>
+        /// <param name="username">The username to use when logging on.</param>
+        /// <param name="password">The password to use when logging on..</param>
         public Task<ClientContext> LogonWithCredentialsAsync(string username, SecureString password)
         {
             return this.LogonWithCredentialsAsync(new SecureCredentials
@@ -51,6 +66,11 @@ namespace GoLava.ApplePie.Clients
             });
         }
 
+        /// <summary>
+        /// Uses credentials to logon.
+        /// </summary>
+        /// <returns>Returns a <see cref="T:ClientContext"/> to be used with all following client calls.</returns>
+        /// <param name="credentials">The credentials to use when logging on.</param>
         public async Task<ClientContext> LogonWithCredentialsAsync(Credentials credentials)
         {
             await Configure.AwaitFalse();
@@ -84,6 +104,12 @@ namespace GoLava.ApplePie.Clients
             return context;
         }
 
+        /// <summary>
+        /// Acquires a the two-step authentication code to be send to the given trusted device.
+        /// </summary>
+        /// <returns>Returns a <see cref="T:ClientContext"/> to be used with all following client calls.</returns>
+        /// <param name="context">The current context.</param>
+        /// <param name="trustedDevice">Trusted device.</param>
         public async Task<ClientContext> AcquireTwoStepCodeAsync(ClientContext context, TrustedDevice trustedDevice)
         {
             await Configure.AwaitFalse();
@@ -95,6 +121,12 @@ namespace GoLava.ApplePie.Clients
             return context;
         }
 
+        /// <summary>
+        /// Uses a previous acquired two-step authentication code to log on.
+        /// </summary>
+        /// <returns>Returns a <see cref="T:ClientContext"/> to be used with all following client calls.</returns>
+        /// <param name="context">The current context.</param>
+        /// <param name="code">The code to be used to finalize the two-step authentication.</param>
         public async Task<ClientContext> LogonWithTwoStepCodeAsync(ClientContext context, string code)
         {
             await Configure.AwaitFalse();
