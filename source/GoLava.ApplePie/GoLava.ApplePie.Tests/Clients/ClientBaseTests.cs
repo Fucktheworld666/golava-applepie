@@ -273,8 +273,8 @@ namespace GoLava.ApplePie.Tests.Clients
                 .Expect(HttpMethod.Post, this.UrlProvider.LogonUrl)
                 .WithContent(this.JsonSerializer.Serialize(new
                 {
-                    accountName = username,
                     password,
+                    accountName = username,
                     rememberMe = true
                 }))
                 .WithHeaders(new[] {
