@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Security;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Contracts;
 using GoLava.ApplePie.Contracts.Attributes;
@@ -33,14 +33,32 @@ namespace GoLava.ApplePie.Clients
 
         protected TUrlProvider UrlProvider { get; }
 
-        public async Task<ClientContext> LogonWithCredentialsAsync(string username, string password)
+        public Task<ClientContext> LogonWithCredentialsAsync(string username, string password)
+        {
+            return this.LogonWithCredentialsAsync(new NonSecureCredentials
+            {
+                AccountName = username,
+                Password = password
+            });
+        }
+
+        public Task<ClientContext> LogonWithCredentialsAsync(string username, SecureString password)
+        {
+            return this.LogonWithCredentialsAsync(new SecureCredentials
+            {
+                AccountName = username,
+                Password = password
+            });
+        }
+
+        public async Task<ClientContext> LogonWithCredentialsAsync(Credentials credentials)
         {
             await Configure.AwaitFalse();
 
             var context = new ClientContext();
             try
             {
-                var logonAuth = await this.LogonWithCredentialsAsync(context, username, password);
+                var logonAuth = await this.LogonWithCredentialsAsync(context, credentials);
                 context.LogonAuth = logonAuth;
                 if (!logonAuth.IsTwoStepRequired)
                 {
@@ -48,9 +66,9 @@ namespace GoLava.ApplePie.Clients
                     context.Authentication = Authentication.Success;
                     context.Session = session;
                 }
-                else 
+                else
                 {
-                    context.Authentication = Authentication.TwoStepSelectTrustedDevice;    
+                    context.Authentication = Authentication.TwoStepSelectTrustedDevice;
                 }
             }
             catch (ApplePieCredentialsException)
@@ -133,7 +151,7 @@ namespace GoLava.ApplePie.Clients
             return new Uri(url);
         }
 
-        protected virtual async Task<LogonAuth> LogonWithCredentialsAsync(ClientContext context, string username, string password)
+        protected virtual async Task<LogonAuth> LogonWithCredentialsAsync(ClientContext context, Credentials credentials)
         {
             await Configure.AwaitFalse();
 
@@ -145,11 +163,7 @@ namespace GoLava.ApplePie.Clients
                 var request = RestRequest.Post(
                     new RestUri(this.UrlProvider.LogonUrl), 
                     this.GetAuthRequestHeaders(context), 
-                    RestContentType.Json, new {
-                        accountName = username,
-                        password,
-                        rememberMe = true
-                    });
+                    RestContentType.Json, credentials);
 
                 var response = await this.SendAsync<LogonAuth>(context, request);
                 return response.Content;
@@ -159,7 +173,7 @@ namespace GoLava.ApplePie.Clients
                 switch (apre.Response.StatusCode)
                 {
                     case HttpStatusCode.Forbidden:
-                        throw new ApplePieCredentialsException($"Invalid username and password combination. Used '{username}' as the username.", apre);
+                        throw new ApplePieCredentialsException($"Invalid username and password combination. Used '{credentials.AccountName}' as the username.", apre);
 
                     case HttpStatusCode.Conflict:
                         return await this.HandleTwoStepAuthenticationAsync(context, apre.Response);

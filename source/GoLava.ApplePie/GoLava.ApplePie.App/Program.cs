@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Clients.AppleDeveloper;
@@ -121,11 +122,11 @@ namespace GoLava.ApplePie.App
             }
         }
 
-        static string ReadPassword()
+        static SecureString ReadPassword()
         {
             var lengths = new Stack<int>();
 
-            var sb = new StringBuilder();
+            var secureString = new SecureString();
             while (true)
             {
                 var i = Console.ReadKey(true);
@@ -135,9 +136,9 @@ namespace GoLava.ApplePie.App
                 }
                 else if (i.Key == ConsoleKey.Backspace)
                 {
-                    if (sb.Length > 0)
+                    if (secureString.Length > 0)
                     {
-                        sb.Remove(sb.Length - 1, 1);
+                        secureString.RemoveAt(secureString.Length - 1);
 
                         // remove the number of stars from the current position
                         var r = lengths.Pop();
@@ -147,7 +148,7 @@ namespace GoLava.ApplePie.App
                 }
                 else
                 {
-                    sb.Append(i.KeyChar);
+                    secureString.AppendChar(i.KeyChar);
 
                     // randomize the number of * to show
                     var r = Random.Next(1, 4); // return numbers between 1 and 3, but not 4 
@@ -156,7 +157,7 @@ namespace GoLava.ApplePie.App
                         Console.Write("*");
                 }
             }
-            return sb.ToString();
+            return secureString;
         }
     }
 }
