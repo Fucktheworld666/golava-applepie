@@ -14,6 +14,8 @@
 
         string UpdateApplicationUrl { get; }
 
+        string GetCertificateRequestsUrl { get; }
+
         string GetDevicesUrl { get; }
 
         string AddDevicesUrl { get; }

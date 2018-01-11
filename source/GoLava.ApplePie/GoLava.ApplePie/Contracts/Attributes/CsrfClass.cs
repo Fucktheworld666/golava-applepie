@@ -3,6 +3,7 @@
     public enum CsrfClass
     {
         Application,
+        Certificate,
         Device,
         Team,
         Undefined

@@ -24,6 +24,10 @@
 
         public string UpdateApplicationUrl => IdentifiersBaseUrl + "updateService.action";
 
+        public const string CertificateBaseUrl = PlatformBaseUrl + "certificate/";
+
+        public string GetCertificateRequestsUrl => CertificateBaseUrl + "listCertRequests.action";
+
         public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";
 
         public string AddDevicesUrl => DeviceBaseUrl + "addDevices.action";

@@ -183,6 +183,32 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return applicationDetails;
         }
 
+        public async Task<List<CertificateRequest>> GetCertificateRequestsAsync(ClientContext context, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var team = await this.GetTeamAsync(context.AsCacheContext());
+            return await this.GetCertificateRequestsAsync(context, team.TeamId, platform);
+        }
+
+        public async Task<List<CertificateRequest>> GetCertificateRequestsAsync(ClientContext context, string teamId, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            if (context.IsForceFromBackend || !context.TryGetValue(out List<CertificateRequest> certificateRequests, teamId, platform))
+            {
+                var certificateRequestsResults = await this.GetCertificateRequestsResultsAsync(
+                    context, teamId, platform);
+
+                certificateRequests = certificateRequestsResults
+                    .Where(r => r.Data != null).SelectMany(r => r.Data).ToList();
+                certificateRequests.ForEach(d => d.TeamId = teamId);
+
+                context.AddValue(certificateRequests, teamId, platform);
+            }
+            return certificateRequests;
+        }
+
         public async Task<List<Device>> GetDevicesAsync(ClientContext context, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
@@ -327,6 +353,23 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
                 context.AddValue(prefixes, teamId, platform);
             }
             return prefixes;
+        }
+
+        private async Task<List<PageResult<CertificateRequest>>> GetCertificateRequestsResultsAsync(ClientContext context, string teamId, Platform platform)
+        {
+            await Configure.AwaitFalse();
+
+            const string types = "5QPB9NHCEI,R58UK2EWSO,9RQEK7MSXA,LA30L5BJEU,BKLRAVXMGM,3BQKVH9I2X,Y3B2F3TYSI,E5D663CMZW,4APLUP237T,3T2ZP62QW8,DZQUP8189Y,T44PTHVNID,MD8Q2VRT6A,FGQUP4785Z,S5WE21TULA,UPV3DW712I,FUOY7LWJET,LJNFM825ES";
+
+            var request = RestRequest.Post(new RestUri(this.UrlProvider.GetCertificateRequestsUrl, new { platform }));
+            var certificateRequestsResults = await this.SendPageRequestAsync<PageResult<CertificateRequest>>(
+                context, request,
+                new Dictionary<string, string> {
+                    { "teamId", teamId },
+                    { "types", types }
+                }
+            );
+            return certificateRequestsResults;
         }
 
         private async Task<List<PageResult<Device>>> GetDevicesResultsAsync(ClientContext context, string teamId, Platform platform)
