@@ -214,7 +214,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return certificateRequests;
         }
 
-        public async Task<X509Certificate2> DownloadCertificateAsync(ClientContext context, CertificateRequest certificateRequest)
+        public async Task<byte[]> DownloadRawCertificateAsync(ClientContext context, CertificateRequest certificateRequest)
         {
             await Configure.AwaitFalse();
 
@@ -231,7 +231,16 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var request = RestRequest.Get(uriBuilder.ToUri());
             var response = await this.SendAsync(context, request);
 
-            return new X509Certificate2(((RawBinaryContent)response.RawContent).Value);
+            var binaryContent = response.RawContent as RawBinaryContent;
+            return binaryContent?.Value;
+        }
+
+        public async Task<X509Certificate2> DownloadCertificateAsync(ClientContext context, CertificateRequest certificateRequest)
+        {
+            await Configure.AwaitFalse();
+
+            var bytes = await this.DownloadRawCertificateAsync(context, certificateRequest);
+            return bytes != null ? new X509Certificate2(bytes) : null;
         }
 
         public async Task<List<Device>> GetDevicesAsync(ClientContext context, Platform platform = Platform.Ios)
