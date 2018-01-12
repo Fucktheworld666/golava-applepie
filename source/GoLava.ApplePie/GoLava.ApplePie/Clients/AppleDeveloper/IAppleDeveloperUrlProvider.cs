@@ -20,7 +20,7 @@
 
         string RevokeCertificateUrl { get; }
 
-        string SubmitCertificateRequestUrl { get; }
+        string SubmitCertificateSigningRequestUrl { get; }
 
         string GetDevicesUrl { get; }
 

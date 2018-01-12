@@ -23,7 +23,7 @@ namespace GoLava.ApplePie.Transfer
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                 UseCookies = false // we handle cookies ourselves
-            }.DecorateWith(new HttpClientConsoleHandler());
+            }; // .DecorateWith(new HttpClientConsoleHandler());
             return pipeline;
         }
 

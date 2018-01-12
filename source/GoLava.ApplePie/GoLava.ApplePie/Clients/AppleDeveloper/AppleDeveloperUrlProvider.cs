@@ -32,7 +32,7 @@
 
         public string RevokeCertificateUrl => CertificateBaseUrl + "revokeCertificate.action";
 
-        public string SubmitCertificateRequestUrl => CertificateBaseUrl + "submitCertificateRequest.action";
+        public string SubmitCertificateSigningRequestUrl => CertificateBaseUrl + "submitCertificateRequest.action";
 
         public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";
 
