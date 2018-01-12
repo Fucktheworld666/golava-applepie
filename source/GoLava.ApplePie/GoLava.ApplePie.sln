@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		..\..\README.md = ..\..\README.md
 		GoLava.ApplePie\GoLava.ApplePie.develop.appveyor.yml = GoLava.ApplePie\GoLava.ApplePie.develop.appveyor.yml
 		GoLava.ApplePie\GoLava.ApplePie.master.appveyor.yml = GoLava.ApplePie\GoLava.ApplePie.master.appveyor.yml
+		..\..\LICENCE = ..\..\LICENCE
 	EndProjectSection
 EndProject
 Global
