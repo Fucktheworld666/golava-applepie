@@ -6,6 +6,7 @@
         Json,
         FormUrlEncoded,
         Text,
-        Html
+        Html,
+        Binary
     }
 }

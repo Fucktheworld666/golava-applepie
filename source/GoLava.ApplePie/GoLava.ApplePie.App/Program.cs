@@ -67,6 +67,11 @@ namespace GoLava.ApplePie.App
                     var certificates = await appleDeveloperClient.GetCertificateRequestsAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: certificates count: {1}", team.TeamId, certificates.Count);
 
+                    foreach (var certificate in certificates)
+                    {
+                        var cert = await appleDeveloperClient.DownloadCertificateAsync(context, certificate);
+                    }
+
                     var applications = await appleDeveloperClient.GetApplicationsAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: applications count: {1}", team.TeamId, applications.Count);
 

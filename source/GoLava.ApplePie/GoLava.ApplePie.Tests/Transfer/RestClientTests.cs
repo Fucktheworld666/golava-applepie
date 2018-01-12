@@ -28,7 +28,7 @@ namespace GoLava.ApplePie.Tests.Transfer
             Assert.True(response.IsSuccess, "IsSuccess is false");
             Assert.Equal(RestContentType.Json, response.ContentType);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal(json, response.RawContent);
+            Assert.Equal(json, response.RawContent.ToString());
             Assert.Equal(response.Content.Foo, "Bar");
 
             mockHttp.VerifyNoOutstandingExpectation();

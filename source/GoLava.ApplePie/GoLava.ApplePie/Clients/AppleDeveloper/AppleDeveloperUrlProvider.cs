@@ -28,6 +28,8 @@
 
         public string GetCertificateRequestsUrl => CertificateBaseUrl + "listCertRequests.action";
 
+        public string DownloadCertificateUrl => CertificateBaseUrl + "downloadCertificateContent.action";
+
         public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";
 
         public string AddDevicesUrl => DeviceBaseUrl + "addDevices.action";

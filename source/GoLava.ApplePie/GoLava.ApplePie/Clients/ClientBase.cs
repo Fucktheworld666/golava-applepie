@@ -152,7 +152,7 @@ namespace GoLava.ApplePie.Clients
                 }
                 return context;
             }
-            catch (ApplePieRestException<LogonAuth> apre)
+            catch (ApplePieRestException apre)
             {
                 switch (apre.Response.StatusCode)
                 {
@@ -266,14 +266,25 @@ namespace GoLava.ApplePie.Clients
             }
         }
 
+        protected async Task<RestResponse> SendAsync(ClientContext context, RestRequest request)
+        {
+            await Configure.AwaitFalse();
+
+            this.PrepareRequest(request);
+
+            var response = await this.RestClient.SendAsync(context, request);
+            if (response.IsSuccess)               
+                return response;
+            
+            var errorMessage = this.GetResponseError(response, out ErrorCode errorCode);
+            throw new ApplePieRestException(errorMessage, response, errorCode);
+        }
+
         protected async Task<RestResponse<TContent>> SendAsync<TContent>(ClientContext context, RestRequest request)
         {
             await Configure.AwaitFalse();
 
-            if (request.Headers == null)
-                request.Headers = new RestHeaders();
-            request.Headers.Set("Accept", "application/json", "text/javascript");
-            request.Headers.Set("X-Requested-With", "XMLHttpRequest");
+            this.PrepareRequest(request);
 
             var csrfClass = FindCsrfClass(typeof(TContent));
             if (context.TryGetValue(out CsrfToken csrfToken, csrfClass))
@@ -291,37 +302,50 @@ namespace GoLava.ApplePie.Clients
                 return response;
             }
 
-            // try to handle error
-            var message = "Failed to send request.";
+            var errorMessage = this.GetResponseError(response, out ErrorCode errorCode);
+            throw new ApplePieRestException<TContent>(errorMessage, response, errorCode);
+        }
 
-            var errorCode = ErrorCode.Unknown;
+        private void PrepareRequest(RestRequest request)
+        {
+            if (request.Headers == null)
+                request.Headers = new RestHeaders();
+            request.Headers.Set("Accept", "application/json", "text/javascript");
+            request.Headers.Set("X-Requested-With", "XMLHttpRequest");
+        }
+
+        private string GetResponseError(RestResponse response, out ErrorCode errorCode)
+        {
+            var errorMessage = "Failed to send request.";
+
+            errorCode = ErrorCode.Unknown;
             switch (response.ContentType)
             {
                 case RestContentType.Json:
-                    var error = this.RestClient.Serializer.Deserialize<Error>(response.RawContent);
+                    var error = this.RestClient.Serializer.Deserialize<Error>(response.RawContent.ToString());
                     if (error.ServiceErrors != null && error.ServiceErrors.Count > 0)
                     {
                         var serviceError = error.ServiceErrors.First();
-                        message = $"{serviceError.Message} ({serviceError.Code})";
+                        errorMessage = $"{serviceError.Message} ({serviceError.Code})";
                         errorCode = new ErrorCode(serviceError.Code);
                     }
                     else if (error.ValidationErrors != null && error.ValidationErrors.Count > 0)
                     {
                         var validationError = error.ValidationErrors.First();
-                        message = $"{validationError.Message} ({validationError.Code})";
+                        errorMessage = $"{validationError.Message} ({validationError.Code})";
                         errorCode = new ErrorCode(validationError.Code);
                     }
                     else if (!string.IsNullOrEmpty(error.UserString))
                     {
-                        message = error.UserString;
+                        errorMessage = error.UserString;
                     }
                     break;
                 case RestContentType.Text:
-                    message = response.RawContent;
+                    errorMessage = response.RawContent.ToString();
                     break;
             }
 
-            throw new ApplePieRestException<TContent>(message, response, errorCode);
+            return errorMessage;
         }
 
         private async Task<LogonAuth> HandleTwoStepAuthenticationAsync(
@@ -330,7 +354,7 @@ namespace GoLava.ApplePie.Clients
         {
             await Configure.AwaitFalse();
 
-            var logonAuth = this.RestClient.Serializer.Deserialize<LogonAuth>(logonAuthResponse.RawContent);
+            var logonAuth = this.RestClient.Serializer.Deserialize<LogonAuth>(logonAuthResponse.RawContent.ToString());
             if (!logonAuth.AuthType.Equals("hsa", StringComparison.OrdinalIgnoreCase))
                 throw new ApplePieException($"Unknown authentication type '{logonAuthResponse.Content.AuthType}'");
 

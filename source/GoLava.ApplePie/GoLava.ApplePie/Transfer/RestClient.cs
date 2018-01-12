@@ -53,8 +53,18 @@ namespace GoLava.ApplePie.Transfer
             var httpRequest = this.CreateHttpRequestMessage(context, request);
             var httpResponse = await _httpClient.SendAsync(httpRequest);
 
-            var restResponse = await this.CreateRestResponseAsync<TContent>(context, httpRequest, httpResponse);
+            var restResponse = await this.CreateRestContentResponseAsync<TContent>(context, httpRequest, httpResponse);
+            return restResponse;
+        }
 
+        public async Task<RestResponse> SendAsync(RestClientContext context, RestRequest request)
+        {
+            await Configure.AwaitFalse();
+
+            var httpRequest = this.CreateHttpRequestMessage(context, request);
+            var httpResponse = await _httpClient.SendAsync(httpRequest);
+
+            var restResponse = await this.CreateRestResponseAsync<RestResponse>(context, httpRequest, httpResponse);
             return restResponse;
         }
 
@@ -83,11 +93,13 @@ namespace GoLava.ApplePie.Transfer
             return httpRequest;
         }
 
-        private async Task<RestResponse<TContent>> CreateRestResponseAsync<TContent>(RestClientContext context, HttpRequestMessage httpRequest, HttpResponseMessage httpResponse)
+        private async Task<TRestResponse> CreateRestResponseAsync<TRestResponse>(
+            RestClientContext context, HttpRequestMessage httpRequest, HttpResponseMessage httpResponse)
+            where TRestResponse: RestResponse, new()
         {
             await Configure.AwaitFalse();
 
-            var restResponse = new RestResponse<TContent>
+            var restResponse = new TRestResponse
             {
                 StatusCode = httpResponse.StatusCode,
                 Headers = new RestHeaders(httpResponse.Headers)
@@ -96,19 +108,39 @@ namespace GoLava.ApplePie.Transfer
             var httpContent = httpResponse.Content;
             if (httpContent != null)
             {
-                restResponse.RawContent = await httpContent.ReadAsStringAsync();
                 restResponse.ContentType = ConvertContentType(httpContent.Headers);
+                if (restResponse.ContentType == RestContentType.Binary)
+                {
+                    var rawContent = await httpContent.ReadAsByteArrayAsync();
+                    restResponse.RawContent = new RawBinaryContent(rawContent);
+                }
+                else
+                {
+                    var rawContent = await httpContent.ReadAsStringAsync();
+                    restResponse.RawContent = new RawStringContent(rawContent);
+                }
             }
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                if (httpResponse.Headers.TryGetValues("set-cookie", out IEnumerable<string> cookieHeaders))
+                    context.CookieJar.Add(httpRequest.RequestUri, cookieHeaders);
+            }
+            return restResponse;
+        }
+
+        private async Task<RestResponse<TContent>> CreateRestContentResponseAsync<TContent>(
+            RestClientContext context, HttpRequestMessage httpRequest, HttpResponseMessage httpResponse)
+        {
+            await Configure.AwaitFalse();
+
+            var restResponse = await this.CreateRestResponseAsync<RestResponse<TContent>>(context, httpRequest, httpResponse);
             if (httpResponse.IsSuccessStatusCode)
             {
                 if (restResponse.ContentType == RestContentType.Json)
                 {
-                    var content = this.Serializer.Deserialize<TContent>(restResponse.RawContent);
+                    var content = this.Serializer.Deserialize<TContent>(restResponse.RawContent.ToString());
                     restResponse.Content = content;
                 }
-
-                if (httpResponse.Headers.TryGetValues("set-cookie", out IEnumerable<string> cookieHeaders))
-                    context.CookieJar.Add(httpRequest.RequestUri, cookieHeaders);
             }
             return restResponse;
         }
@@ -124,6 +156,8 @@ namespace GoLava.ApplePie.Transfer
                 case "application/json":
                 case "text/javascript":
                     return RestContentType.Json;
+                case "application/octet-stream":
+                    return RestContentType.Binary;
             }
 
             return RestContentType.None;
