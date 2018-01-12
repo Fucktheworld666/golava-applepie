@@ -1,14 +1,14 @@
-﻿using System.ComponentModel;
+﻿using System.Runtime.Serialization;
 
 namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public enum DataProtectionPermissionLevel
     {
-        [Description("complete")]
+        [EnumMember(Value = "complete")]
         Complete,
-        [Description("unlessopen")]
+        [EnumMember(Value = "unlessopen")]
         UnlessOpen,
-        [Description("untilfirstauth")]
+        [EnumMember(Value = "untilfirstauth")]
         UntilFirstAuth
     }
 }

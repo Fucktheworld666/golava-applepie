@@ -1,18 +1,18 @@
-﻿using System.ComponentModel;
+﻿using System.Runtime.Serialization;
 
 namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public enum DeviceClass
     {
-        [Description("watch")]
+        [EnumMember(Value = "watch")]
         AppleWatch,
-        [Description("ipad")]
+        [EnumMember(Value = "ipad")]
         iPad,
-        [Description("iphone")]
+        [EnumMember(Value = "iphone")]
         iPhone,
-        [Description("ipod")]
+        [EnumMember(Value = "ipod")]
         iPod,
-        [Description("tvOS")]
+        [EnumMember(Value = "tvOS")]
         AppleTV
     }
 }

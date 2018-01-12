@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using GoLava.ApplePie.Formatting;
 using Xunit;
 
@@ -97,7 +98,7 @@ namespace GoLava.ApplePie.Tests.Formatting
         public enum TestEnum
         {
             One,
-            [Description("zwei")]
+            [EnumMember(Value = "zwei")]
             Two
         }
     }

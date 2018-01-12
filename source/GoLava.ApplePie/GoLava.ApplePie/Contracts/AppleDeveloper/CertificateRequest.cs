@@ -1,6 +1,7 @@
 ﻿using System;
 using GoLava.ApplePie.Contracts.Attributes;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
@@ -44,7 +45,8 @@ namespace GoLava.ApplePie.Contracts.AppleDeveloper
 
         public int CertRequestStatusCode { get; set; }
 
-        public string CertificateTypeDisplayId { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public CertificateTypeDisplayId CertificateTypeDisplayId { get; set; }
 
         [JsonProperty("serialNum")]
         public string SerialNumber { get; set; }

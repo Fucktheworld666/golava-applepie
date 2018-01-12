@@ -1,14 +1,14 @@
-﻿using System.ComponentModel;
+﻿using System.Runtime.Serialization;
 
 namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public enum Platform
     {
-        [Description("ios")]
+        [EnumMember(Value = "ios")]
         Ios,
-        [Description("mac")]
+        [EnumMember(Value = "mac")]
         Mac,
-        [Description("safari")]
+        [EnumMember(Value = "safari")]
         Safari
     }
 }

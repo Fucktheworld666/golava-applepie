@@ -75,7 +75,7 @@ namespace GoLava.ApplePie.Formatting
         private static object Convert(object o)
         {
             if (o is Enum e)
-                return e.ToDescriptionString();
+                return e.ToStringValue();
             return o;
         }
 

@@ -1,12 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System.Runtime.Serialization;
 
 namespace GoLava.ApplePie.Contracts.AppleDeveloper
 {
     public enum ApplicationType
     {
-        [Description("explicit")]
+        [EnumMember(Value = "explicit")]
         Explicit,
-        [Description("wildcard")]
+        [EnumMember(Value = "wildcard")]
         Wildcard
     }
 }

@@ -359,14 +359,12 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            const string types = "5QPB9NHCEI,R58UK2EWSO,9RQEK7MSXA,LA30L5BJEU,BKLRAVXMGM,3BQKVH9I2X,Y3B2F3TYSI,E5D663CMZW,4APLUP237T,3T2ZP62QW8,DZQUP8189Y,T44PTHVNID,MD8Q2VRT6A,FGQUP4785Z,S5WE21TULA,UPV3DW712I,FUOY7LWJET,LJNFM825ES";
-
             var request = RestRequest.Post(new RestUri(this.UrlProvider.GetCertificateRequestsUrl, new { platform }));
             var certificateRequestsResults = await this.SendPageRequestAsync<PageResult<CertificateRequest>>(
                 context, request,
                 new Dictionary<string, string> {
                     { "teamId", teamId },
-                    { "types", types }
+                    { "types", CertificateTypeDisplayIds.GetPlatformIds(platform).ToStringValue() }
                 }
             );
             return certificateRequestsResults;

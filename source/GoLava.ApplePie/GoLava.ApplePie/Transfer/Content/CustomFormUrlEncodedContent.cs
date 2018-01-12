@@ -99,7 +99,7 @@ namespace GoLava.ApplePie.Transfer.Content
                 return l.ToString(CultureInfo.InvariantCulture);
 
             if (value is Enum e)
-                return e.ToDescriptionString();
+                return e.ToStringValue();
             
             if (value is IEnumerable collection)
             {
