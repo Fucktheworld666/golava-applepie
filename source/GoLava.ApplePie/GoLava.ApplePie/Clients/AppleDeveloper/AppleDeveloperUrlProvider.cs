@@ -30,6 +30,10 @@
 
         public string DownloadCertificateUrl => CertificateBaseUrl + "downloadCertificateContent.action";
 
+        public string RevokeCertificateUrl => CertificateBaseUrl + "revokeCertificate.action";
+
+        public string SubmitCertificateRequestUrl => CertificateBaseUrl + "submitCertificateRequest.action";
+
         public string GetDevicesUrl => DeviceBaseUrl + "listDevices.action";
 
         public string AddDevicesUrl => DeviceBaseUrl + "addDevices.action";

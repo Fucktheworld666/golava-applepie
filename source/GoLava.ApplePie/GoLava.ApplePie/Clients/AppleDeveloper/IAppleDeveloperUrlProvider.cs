@@ -18,6 +18,10 @@
 
         string DownloadCertificateUrl { get; }
 
+        string RevokeCertificateUrl { get; }
+
+        string SubmitCertificateRequestUrl { get; }
+
         string GetDevicesUrl { get; }
 
         string AddDevicesUrl { get; }

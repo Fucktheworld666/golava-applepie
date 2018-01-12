@@ -243,6 +243,41 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return bytes != null ? new X509Certificate2(bytes) : null;
         }
 
+        public async Task<CertificateRequest> RevokeCertificateRequestAsync(ClientContext context, CertificateRequest certificateRequest)
+        {
+            await Configure.AwaitFalse();
+
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.DownloadCertificateUrl, new { 
+                platform = certificateRequest.Platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", certificateRequest.TeamId },
+                { "certificateId", certificateRequest.CertificateId },
+                { "type", certificateRequest.CertificateTypeDisplayId.ToStringValue() }
+            });
+
+            var request = RestRequest.Post(uriBuilder.ToUri());
+            var response = await this.SendAsync<Result<CertificateRequest>>(context, request);
+            this.CheckResultForErrors(response.Content);
+
+            return response.Content.Data;
+        }
+
+        public async Task<CertificateRequest> SubmitCertificateSigningRequestAsync(ClientContext context, string teamId, CertificateSigningRequest certSigningRequest, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.SubmitCertificateSigningRequestUrl, new { platform }));
+            uriBuilder.AddQueryValues(new Dictionary<string, string> {
+                { "teamId", teamId }
+            });
+
+            var request = RestRequest.Post(uriBuilder.ToUri(), RestContentType.FormUrlEncoded, certSigningRequest);
+            var response = await this.SendAsync<Result<CertificateRequest>>(context, request);
+            this.CheckResultForErrors(response.Content);
+
+            return response.Content.Data;
+        }
+
         public async Task<List<Device>> GetDevicesAsync(ClientContext context, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
