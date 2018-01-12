@@ -70,6 +70,7 @@ namespace GoLava.ApplePie.App
                     foreach (var certificate in certificates)
                     {
                         var cert = await appleDeveloperClient.DownloadCertificateAsync(context, certificate);
+                        Console.WriteLine("\tCertificate: {0}", cert.Subject);
                     }
 
                     var applications = await appleDeveloperClient.GetApplicationsAsync(context, team.TeamId);
