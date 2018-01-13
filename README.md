@@ -10,6 +10,15 @@ ApplePie is a .NET standard 2.0 library that exposes the Apple Developer Center 
 It’s fast, convenient, tested and supports all of the operations you can do via the browser. Integrating your Developer Center workflow 
 into your .NET environment has never been easier!
 
+# Example
+
+# Features
+
+| Feature                    | Implemented | Tested
+|----------------------------|:-----------:|-------
+| Credentials Authentication | yes         | yes
+| Two-Step Authentication    | yes         | yes
+
 # License
 This project is licensed under the terms of the MIT license. See the [LICENSE](https://github.com/golava/golava-applepie/blob/master/LICENSE) 
 file.
