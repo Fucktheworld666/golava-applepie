@@ -15,9 +15,11 @@ into your .NET environment has never been easier!
 # Features
 
 | Feature                    | Implemented | Tested
-|----------------------------|:-----------:|-------
-| Credentials Authentication | yes         | yes
-| Two-Step Authentication    | yes         | yes
+|----------------------------|:-----------:|:-------:
+| Credentials authentication | v0.90       | v0.90
+| Two-Step authentication    | v0.90       | v0.90
+| Retrieve teams             | v0.90       | v0.90
+| Update team name           | v0.90       | v0.90
 
 # License
 This project is licensed under the terms of the MIT license. See the [LICENSE](https://github.com/golava/golava-applepie/blob/master/LICENSE) 
