@@ -12,14 +12,20 @@ into your .NET environment has never been easier!
 
 # Example
 
-# Features
+```csharp
+ar client = new AppleDeveloperClient();
 
-| Feature                    | Implemented | Tested
-|----------------------------|:-----------:|:-------:
-| Credentials authentication | v0.90       | v0.90
-| Two-Step authentication    | v0.90       | v0.90
-| Retrieve teams             | v0.90       | v0.90
-| Update team name           | v0.90       | v0.90
+// login
+var context = await client.LogonWithCredentialsAsync(userName, password);
+
+// create a new application id
+var newApplication = await client.AddApplicationAsync(context, new AddApplication {
+   Passbook = true,
+   HealthKit = true,
+   Identifier = "io.golava.applepie_app",
+   Name = "ApplePie App"
+});
+```
 
 # License
 This project is licensed under the terms of the MIT license. See the [LICENSE](https://github.com/golava/golava-applepie/blob/master/LICENSE) 
