@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>$id$</id>
+    <id>golava-applepie</id>
     <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <title>GoLava.ApplePie</title>
+    <authors>GoLava / Sascha Kiefer</authors>
+    <owners>GoLava</owners>
     <licenseUrl>https://github.com/golava/golava-applepie/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://applepie.golava.io/</projectUrl>
     <iconUrl>https://github.com/golava/golava-applepie/raw/master/nuspec.png</iconUrl>
