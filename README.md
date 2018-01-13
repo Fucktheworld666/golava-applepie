@@ -13,7 +13,7 @@ into your .NET environment has never been easier!
 # Example
 
 ```csharp
-ar client = new AppleDeveloperClient();
+var client = new AppleDeveloperClient();
 
 // login
 var context = await client.LogonWithCredentialsAsync(userName, password);
