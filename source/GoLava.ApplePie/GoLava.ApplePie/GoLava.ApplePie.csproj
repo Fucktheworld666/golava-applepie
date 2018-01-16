@@ -15,6 +15,7 @@
     <PackageProjectUrl>https://applepie.golava.io/</PackageProjectUrl>
     <Title>GoLava.ApplePie</Title>
     <Description>ApplePie is a .NET standard 2.0 library that exposes the Apple Developer Center and iTunes Connect API.</Description>
+    <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
