@@ -14,8 +14,6 @@ namespace GoLava.ApplePie
         private Devices _devices;
         private Teams _teams;
 
-        internal AppleDeveloperClient AppleDeveloperClient { get; } = new AppleDeveloperClient();
-
         /// <summary>
         /// Gets access to the applications API.
         /// </summary>
@@ -91,5 +89,7 @@ namespace GoLava.ApplePie
         {
             return this.AppleDeveloperClient.LogonWithTwoStepCodeAsync(context, code);
         }
+
+        internal AppleDeveloperClient AppleDeveloperClient { get; } = new AppleDeveloperClient();
     }
 }
