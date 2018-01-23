@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Contracts;
 using GoLava.ApplePie.Contracts.AppleDeveloper;
+using GoLava.ApplePie.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GoLava.ApplePie.App
 {
@@ -14,8 +16,21 @@ namespace GoLava.ApplePie.App
 
         static void Main(string[] args) => MainAsync(args).Wait();
 
+        private static IServiceProvider ConfigureServices()
+        {
+            //setup dependency injection
+            var services = new ServiceCollection();
+            services.AddApplePie();
+
+            var serviceProvider = services.BuildServiceProvider();
+            return serviceProvider;
+        }
+
         static async Task MainAsync(string[] args)
         {
+            var serviceProvider = ConfigureServices();
+            var appliePieClient = serviceProvider.GetService<ApplePieClient>();
+
             var appleDeveloperClient = new AppleDeveloperClient();
 
             Console.WriteLine("Enter Apple Account Name:");

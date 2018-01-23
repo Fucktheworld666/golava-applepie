@@ -27,6 +27,13 @@ namespace GoLava.ApplePie.Tests.Security
             Assert.NotEmpty(certificateRequestWithPrivateKey.PrivateKey);
         }
 
+        [Fact]
+        public void CreateCertificateRequestWithPrivateKeyReturnsValidPublicKey()
+        {
+            var certificateRequestWithPrivateKey = this.CreateCertificateRequestWithPrivateKey();
+            Assert.NotEmpty(certificateRequestWithPrivateKey.PublicKey);
+        }
+
         private CertificateRequestWithPrivateKey CreateCertificateRequestWithPrivateKey()
         {
             var certificateRequestFactory = new CertificateRequestFactory();

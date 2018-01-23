@@ -27,12 +27,12 @@ namespace GoLava.ApplePie.Clients.ApplePie
             return _certificateRequestFactory.CreateCertificateRequestWithPrivateKey(securePassword);
         }
 
-        public async Task<CertificateRequest> CreateAndSubmitCertificateSigningRequestAsync(ClientContext clientContext, SecureString securePassword, CertificateTypeDisplayId certificateType, Application application)
+        public async Task<CertificateRequest> CreateAndSubmitCertificateSigningRequestAsync(ClientContext clientContext, Application application, CertificateTypeDisplayId certificateType, SecureString securePassword)
         {
             await Configure.AwaitFalse();
 
             var certificateRequestWithPrivateKey = this.CreateCertificateRequestWithPrivateKey(securePassword);
-            return await _applePieClient.AppleDeveloperClient.SubmitCertificateSigningRequestAsync(
+            var result = await _applePieClient.AppleDeveloperClient.SubmitCertificateSigningRequestAsync(
                 clientContext, 
                 application.TeamId, 
                 new CertificateSigningRequest
@@ -43,6 +43,8 @@ namespace GoLava.ApplePie.Clients.ApplePie
                 },
                 application.Platform
             );
+            await _applePieClient.CertificateStore.StoreAsync(result.CertificateId, certificateRequestWithPrivateKey.PrivateKey);
+            return result;
         }
     }
 }

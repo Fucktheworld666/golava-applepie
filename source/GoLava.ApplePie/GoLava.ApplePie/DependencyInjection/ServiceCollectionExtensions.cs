@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using GoLava.ApplePie.Clients.AppleDeveloper;
+using GoLava.ApplePie.Clients.ApplePie;
 using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Transfer;
 using GoLava.ApplePie.Transfer.Resolvers;
@@ -20,6 +21,7 @@ namespace GoLava.ApplePie.DependencyInjection
             setup?.Invoke(options);
 
             services.AddSingleton<IAppleDeveloperUrlProvider>(options.AppleDeveloperFactory);
+            services.AddSingleton<ICertificateStore>(options.CertificateStoreFactory);
             services.AddSingleton<ApplePieOptions>(options);
 
             var jsonSerializer = new Serializers.JsonSerializer(new JsonSerializerSettings
@@ -30,6 +32,9 @@ namespace GoLava.ApplePie.DependencyInjection
 
             services.AddSingleton<IJsonSerializer>(jsonSerializer);
             services.AddSingleton<IRestClient, RestClient>();
+
+            services.AddSingleton<AppleDeveloperClient>();
+            services.AddSingleton<ApplePieClient>();
         }
     }
 }

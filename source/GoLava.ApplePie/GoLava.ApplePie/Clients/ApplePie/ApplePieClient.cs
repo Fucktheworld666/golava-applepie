@@ -1,4 +1,5 @@
-﻿using System.Security;
+﻿using System;
+using System.Security;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Clients;
 using GoLava.ApplePie.Clients.AppleDeveloper;
@@ -13,6 +14,14 @@ namespace GoLava.ApplePie
         private Certificates _certificates;
         private Devices _devices;
         private Teams _teams;
+
+        public ApplePieClient(
+            AppleDeveloperClient appleDeveloperClient,
+            ICertificateStore certificateStore)
+        {
+            this.AppleDeveloperClient = appleDeveloperClient;
+            this.CertificateStore = certificateStore;
+        }
 
         /// <summary>
         /// Gets access to the applications API.
@@ -90,6 +99,8 @@ namespace GoLava.ApplePie
             return this.AppleDeveloperClient.LogonWithTwoStepCodeAsync(context, code);
         }
 
-        internal AppleDeveloperClient AppleDeveloperClient { get; } = new AppleDeveloperClient();
+        internal ICertificateStore CertificateStore { get; }
+
+        internal AppleDeveloperClient AppleDeveloperClient { get; }
     }
 }

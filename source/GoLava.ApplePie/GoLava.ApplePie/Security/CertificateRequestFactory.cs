@@ -53,7 +53,8 @@ namespace GoLava.ApplePie.Security
             return new CertificateRequestWithPrivateKey
             {
                 CertificateRequest = EncodePem(pkcs10CertificationRequest),
-                PrivateKey = EncodePem(encryptedPrivateKey)
+                PrivateKey = EncodePem(encryptedPrivateKey),
+                PublicKey = EncodePem(asymmetricCipherKeyPair.Public)
             };
         }
 

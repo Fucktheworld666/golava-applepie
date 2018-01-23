@@ -15,5 +15,10 @@
         /// Gets or sets the private key in PEM format.
         /// </summary>
         public string PrivateKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets the public key in PEM format.
+        /// </summary>
+        public string PublicKey { get; set; }
     }
 }
