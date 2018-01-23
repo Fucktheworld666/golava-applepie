@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Transfer;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -20,7 +21,7 @@ namespace GoLava.ApplePie.Tests.Transfer
                 .Expect("http://domain.ext/")
                 .Respond("application/json", json);
 
-            var restClient = new RestClient(mockHttp);
+            var restClient = new RestClient(JsonSerializer.Create(), mockHttp);
             var context = new RestClientContext();
             var request = RestRequest.Get(new RestUri("http://domain.ext/"));
             var response = await restClient.SendAsync<Contract>(context, request);
@@ -43,7 +44,7 @@ namespace GoLava.ApplePie.Tests.Transfer
                 .WithHeaders("user-agent", "GoLava/1.0")
                 .Respond("application/json", "{'foo' : 'Bar'}");
 
-            var restClient = new RestClient(mockHttp);
+            var restClient = new RestClient(JsonSerializer.Create(), mockHttp);
             var context = new RestClientContext();
             var request = RestRequest.Get(new RestUri("http://domain.ext/"));
             var response = await restClient.SendAsync<Contract>(context, request);
@@ -62,7 +63,7 @@ namespace GoLava.ApplePie.Tests.Transfer
                 .WithHeaders("connection", "keep-alive")
                 .Respond("application/json", "{'foo' : 'Bar'}");
 
-            var restClient = new RestClient(mockHttp);
+            var restClient = new RestClient(JsonSerializer.Create(), mockHttp);
             var context = new RestClientContext();
             var request = RestRequest.Get(new RestUri("http://domain.ext/"));
             var response = await restClient.SendAsync<Contract>(context, request);
@@ -81,7 +82,7 @@ namespace GoLava.ApplePie.Tests.Transfer
                 .WithHeaders("host", "domain.ext")
                 .Respond("application/json", "{'foo' : 'Bar'}");
 
-            var restClient = new RestClient(mockHttp);
+            var restClient = new RestClient(JsonSerializer.Create(), mockHttp);
             var context = new RestClientContext();
             var request = RestRequest.Get(new RestUri("http://domain.ext/"));
             var response = await restClient.SendAsync<Contract>(context, request);
@@ -100,7 +101,7 @@ namespace GoLava.ApplePie.Tests.Transfer
                 .WithHeaders("cookie", "foo=bar; hello=world")
                 .Respond("application/json", "{'foo' : 'Bar'}");
 
-            var restClient = new RestClient(mockHttp);
+            var restClient = new RestClient(JsonSerializer.Create(), mockHttp);
             var context = new RestClientContext();
             context.CookieJar.Add(new Uri("http://domain.ext/"), new Cookie("foo", "bar"));
             context.CookieJar.Add(new Uri("http://domain.ext/"), new Cookie("hello", "world"));
@@ -122,7 +123,7 @@ namespace GoLava.ApplePie.Tests.Transfer
             mockHttp
                 .Expect("http://domain.ext/")
                 .Respond(req => res);
-            var restClient = new RestClient(mockHttp);
+            var restClient = new RestClient(JsonSerializer.Create(), mockHttp);
             var context = new RestClientContext();
             var request = RestRequest.Get(new RestUri("http://domain.ext/"));
             var response = await restClient.SendAsync<Contract>(context, request);

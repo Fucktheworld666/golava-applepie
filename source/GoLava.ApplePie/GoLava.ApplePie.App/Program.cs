@@ -16,7 +16,7 @@ namespace GoLava.ApplePie.App
 
         static async Task MainAsync(string[] args)
         {
-            var appleDeveloperClient = new AppleDeveloperClient(new AppleDeveloperUrlProvider());
+            var appleDeveloperClient = new AppleDeveloperClient();
 
             Console.WriteLine("Enter Apple Account Name:");
             var accountName = Console.ReadLine();

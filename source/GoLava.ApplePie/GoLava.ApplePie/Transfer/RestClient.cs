@@ -4,18 +4,16 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using GoLava.ApplePie.Extensions;
+using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer.Content;
-using GoLava.ApplePie.Transfer.Handlers;
-using GoLava.ApplePie.Transfer.Resolvers;
-using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Transfer
 {
-    public class RestClient 
+    public class RestClient : IRestClient
     {
         private readonly HttpClient _httpClient;
+        private readonly IJsonSerializer _jsonSerializer;
 
         private static HttpMessageHandler CreateHttpMessageHandlerPipeline()
         {
@@ -28,23 +26,20 @@ namespace GoLava.ApplePie.Transfer
         }
 
         public RestClient()
-            : this(CreateHttpMessageHandlerPipeline()) { }
+            : this(null) { }
 
-        public RestClient(HttpMessageHandler httpMessageHandler)
+        public RestClient(IJsonSerializer jsonSerializer)
+            : this(jsonSerializer, CreateHttpMessageHandlerPipeline()) { }
+
+        public RestClient(IJsonSerializer jsonSerializer, HttpMessageHandler httpMessageHandler)
         {
             if (httpMessageHandler == null)
                 throw new ArgumentNullException(nameof(httpMessageHandler));
             
             _httpClient = new HttpClient(httpMessageHandler);
 
-            this.Serializer = new Serializers.JsonSerializer(new JsonSerializerSettings 
-            {
-                ContractResolver = new CustomPropertyNamesContractResolver(),
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            _jsonSerializer = jsonSerializer ?? JsonSerializer.Create();
         }
-
-        public Serializers.JsonSerializer Serializer { get; }
 
         public async Task<RestResponse<TContent>> SendAsync<TContent>(RestClientContext context, RestRequest request)
         {
@@ -138,7 +133,7 @@ namespace GoLava.ApplePie.Transfer
             {
                 if (restResponse.ContentType == RestContentType.Json)
                 {
-                    var content = this.Serializer.Deserialize<TContent>(restResponse.RawContent.ToString());
+                    var content = _jsonSerializer.Deserialize<TContent>(restResponse.RawContent.ToString());
                     restResponse.Content = content;
                 }
             }
@@ -172,7 +167,7 @@ namespace GoLava.ApplePie.Transfer
             switch (restRequest.ContentType)
             {
                 case RestContentType.Json:
-                    var json = this.Serializer.Serialize(restRequest.Content);
+                    var json = _jsonSerializer.Serialize(restRequest.Content);
                     httpContent = new StringContent(json, restRequest.ContentEncoding, "application/json");
                     if (restRequest.ContentEncoding == null)
                         httpContent.Headers.ContentType.CharSet = null;

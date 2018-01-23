@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using GoLava.ApplePie.Contracts.AppleDeveloper;
 using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Extensions;
+using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
 using GoLava.ApplePie.Transfer.Content;
@@ -21,13 +22,13 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         private readonly CustomPropertyNamesContractResolver _resolver = new CustomPropertyNamesContractResolver();
 
         public AppleDeveloperClient()
-            : this(new AppleDeveloperUrlProvider()) { }
+            : this(new AppleDeveloperUrlProvider(), Serializers.JsonSerializer.Create()) { }
 
-        public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider)
-                : base(urlProvider) { }
+        public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider, IJsonSerializer jsonSerializer)
+            : base(urlProvider, new RestClient(jsonSerializer), jsonSerializer) { }
 
-        public AppleDeveloperClient(RestClient restClient, IAppleDeveloperUrlProvider urlProvider)
-            : base(restClient, urlProvider) { }
+        public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider, IRestClient restClient, IJsonSerializer jsonSerializer)
+            : base(urlProvider, restClient, jsonSerializer) { }
 
         public async Task<List<Team>> GetTeamsAsync(ClientContext context)
         {

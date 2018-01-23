@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GoLava.ApplePie.Clients;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Contracts.AppleDeveloper;
+using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Transfer;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -30,7 +31,7 @@ namespace GoLava.ApplePie.Tests.Clients.AppleDeveloper
             this.AddValidTeamsExpectation(mockHttp);
 
             var context = this.CreateClientContext();
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider) as AppleDeveloperClient;
+            var client = this.CreateClient(mockHttp) as AppleDeveloperClient;
             var teams = await client.GetTeamsAsync(context);
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -57,7 +58,7 @@ namespace GoLava.ApplePie.Tests.Clients.AppleDeveloper
             var context = this.CreateClientContext();
             context.AddValue(expectedTeams);
 
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider) as AppleDeveloperClient;
+            var client = this.CreateClient(mockHttp) as AppleDeveloperClient;
             var teams = await client.GetTeamsAsync(context);
 
             Assert.Same(expectedTeams, teams);
@@ -74,7 +75,7 @@ namespace GoLava.ApplePie.Tests.Clients.AppleDeveloper
             var context = this.CreateClientContext();
             context.AddValue(expectedTeams);
 
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider) as AppleDeveloperClient;
+            var client = this.CreateClient(mockHttp) as AppleDeveloperClient;
             var teams = await client.GetTeamsAsync(context.AsBackendContext());
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -82,9 +83,10 @@ namespace GoLava.ApplePie.Tests.Clients.AppleDeveloper
             Assert.NotSame(expectedTeams, teams);
         }
 
-        protected override ClientBase<IAppleDeveloperUrlProvider> CreateClient(RestClient restClient, IAppleDeveloperUrlProvider urlProvider)
+        protected override ClientBase<IAppleDeveloperUrlProvider> CreateClient(MockHttpMessageHandler mockHttp)
         {
-            return new AppleDeveloperClient(restClient, urlProvider);
+            var restClient = new RestClient(this.JsonSerializer, mockHttp);
+            return new AppleDeveloperClient(this.UrlProvider, restClient, this.JsonSerializer);
         }
 
         private ClientContext CreateClientContext()

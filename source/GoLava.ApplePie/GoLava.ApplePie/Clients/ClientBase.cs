@@ -8,6 +8,7 @@ using GoLava.ApplePie.Contracts;
 using GoLava.ApplePie.Contracts.Attributes;
 using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Formatting;
+using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
 
@@ -21,20 +22,20 @@ namespace GoLava.ApplePie.Clients
     {
         private readonly NamedFormatter _namedFormatter;
 
-        protected ClientBase(TUrlProvider urlProvider)
-            : this(new RestClient(), urlProvider) { }
-
-        protected ClientBase(RestClient restClient, TUrlProvider urlProvider)
+        protected ClientBase(TUrlProvider urlProvider, IRestClient restClient, IJsonSerializer jsonSerializer)
         {
             _namedFormatter = new NamedFormatter();
 
             this.RestClient = restClient;
             this.UrlProvider = urlProvider;
+            this.JsonSerializer = jsonSerializer;
         }
 
-        protected RestClient RestClient { get; }
+        protected IRestClient RestClient { get; }
 
         protected TUrlProvider UrlProvider { get; }
+
+        protected IJsonSerializer JsonSerializer { get; }
 
         /// <summary>
         /// Uses username and password to logon.
@@ -322,7 +323,7 @@ namespace GoLava.ApplePie.Clients
             switch (response.ContentType)
             {
                 case RestContentType.Json:
-                    var error = this.RestClient.Serializer.Deserialize<Error>(response.RawContent.ToString());
+                    var error = this.JsonSerializer.Deserialize<Error>(response.RawContent.ToString());
                     if (error.ServiceErrors != null && error.ServiceErrors.Count > 0)
                     {
                         var serviceError = error.ServiceErrors.First();
@@ -354,7 +355,7 @@ namespace GoLava.ApplePie.Clients
         {
             await Configure.AwaitFalse();
 
-            var logonAuth = this.RestClient.Serializer.Deserialize<LogonAuth>(logonAuthResponse.RawContent.ToString());
+            var logonAuth = this.JsonSerializer.Deserialize<LogonAuth>(logonAuthResponse.RawContent.ToString());
             if (!logonAuth.AuthType.Equals("hsa", StringComparison.OrdinalIgnoreCase))
                 throw new ApplePieException($"Unknown authentication type '{logonAuthResponse.Content.AuthType}'");
 

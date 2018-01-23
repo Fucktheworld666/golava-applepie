@@ -37,11 +37,7 @@ namespace GoLava.ApplePie.Tests.Clients
 
         protected TUrlProvider UrlProvider { get; }
 
-        protected JsonSerializer JsonSerializer { get; } = new JsonSerializer(new Newtonsoft.Json.JsonSerializerSettings
-        {
-            ContractResolver = new CustomPropertyNamesContractResolver(),
-            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
-        });
+        protected IJsonSerializer JsonSerializer { get; } = GoLava.ApplePie.Serializers.JsonSerializer.Create();
 
         [Fact]
         public async Task LogonWithInvalidCredentialsSetsAuthenticationToFailed()
@@ -120,7 +116,7 @@ namespace GoLava.ApplePie.Tests.Clients
             Assert.Equal(Expected_Session_User_FullName, context.Session.User.FullName);
         }
 
-        protected abstract ClientBase<TUrlProvider> CreateClient(RestClient restClient, TUrlProvider urlProvider);
+        protected abstract ClientBase<TUrlProvider> CreateClient(MockHttpMessageHandler mockHttp);
 
         private async Task<ClientContext> AcquireTwoStepCodeAsync(TrustedDevice trustedDevice)
         {
@@ -141,7 +137,7 @@ namespace GoLava.ApplePie.Tests.Clients
             var mockHttp = new MockHttpMessageHandler();
             this.AddSecurityCodeExpectation(mockHttp, trustedDevice, null);
 
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
+            var client = this.CreateClient(mockHttp);
             context = await client.AcquireTwoStepCodeAsync(context, trustedDevice);
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -155,7 +151,7 @@ namespace GoLava.ApplePie.Tests.Clients
             this.AddAuthTokenExpectation(mockHttp);
             this.AddLogonExpectation(mockHttp, username, password, HttpStatusCode.Forbidden, null);
 
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
+            var client = this.CreateClient(mockHttp);
             var context = await client.LogonWithCredentialsAsync(username, password);
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -183,7 +179,7 @@ namespace GoLava.ApplePie.Tests.Clients
             var mockHttp = new MockHttpMessageHandler();
             this.AddSecurityCodeExpectation(mockHttp, trustedDevice, code);
 
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
+            var client = this.CreateClient(mockHttp);
             context = await client.LogonWithTwoStepCodeAsync(context, code);
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -200,7 +196,7 @@ namespace GoLava.ApplePie.Tests.Clients
                 AuthType = "sa" 
             });
 
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
+            var client = this.CreateClient(mockHttp);
             var context = await client.LogonWithCredentialsAsync(username, password);
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -222,7 +218,7 @@ namespace GoLava.ApplePie.Tests.Clients
                     { "scnt", Expected_TwoStep_Scnt }
                 });
 
-            var client = this.CreateClient(new RestClient(mockHttp), this.UrlProvider);
+            var client = this.CreateClient(mockHttp);
             var context = await client.LogonWithCredentialsAsync(username, password);
 
             mockHttp.VerifyNoOutstandingExpectation();
