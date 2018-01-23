@@ -72,6 +72,8 @@ namespace GoLava.ApplePie.App
                         Console.WriteLine("\tCertificate: {0}", cert.Subject);
                     }
 
+
+
                     var applications = await appleDeveloperClient.GetApplicationsAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: applications count: {1}", team.TeamId, applications.Count);
 

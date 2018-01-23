@@ -37,6 +37,7 @@
     <Folder Include="Serializers\" />
     <Folder Include="Properties\" />
     <Folder Include="Security\" />
+    <Folder Include="Clients\ApplePie\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

@@ -262,6 +262,14 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             return response.Content.Data;
         }
 
+        public async Task<CertificateRequest> SubmitCertificateSigningRequestAsync(ClientContext context, CertificateSigningRequest certSigningRequest, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var team = await this.GetTeamAsync(context.AsCacheContext());
+            return await this.SubmitCertificateSigningRequestAsync(context, team.TeamId, certSigningRequest, platform);
+        }
+
         public async Task<CertificateRequest> SubmitCertificateSigningRequestAsync(ClientContext context, string teamId, CertificateSigningRequest certSigningRequest, Platform platform = Platform.Ios)
         {
             await Configure.AwaitFalse();
