@@ -39,7 +39,7 @@ namespace GoLava.ApplePie.Contracts
         /// <summary>
         /// Gets or sets the password.
         /// </summary>
-        [JsonConverter(typeof(SecureStringConverter))]
+        [JsonConverter(typeof(SecureStringJsonConverter))]
         public SecureString Password { get; set; }
     }
 }

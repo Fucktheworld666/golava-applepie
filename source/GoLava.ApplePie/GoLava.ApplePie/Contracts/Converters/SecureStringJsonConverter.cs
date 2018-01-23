@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Security;
+using GoLava.ApplePie.Security;
 using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Contracts.Converters
@@ -8,7 +8,7 @@ namespace GoLava.ApplePie.Contracts.Converters
     /// <summary>
     /// Deserializes a <see cref="T:SecureString"/> to JSON.
     /// </summary>
-    public class SecureStringConverter : JsonConverter
+    public class SecureStringJsonConverter : JsonConverter
     {
         /// <summary>
         /// Determines whether this instance can convert the specified object type.
@@ -56,16 +56,8 @@ namespace GoLava.ApplePie.Contracts.Converters
             }
             else
             {
-                var unmanagedString = IntPtr.Zero;
-                try
-                {
-                    unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(secureString);
-                    writer.WriteValue(Marshal.PtrToStringUni(unmanagedString));
-                }
-                finally
-                {
-                    Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
-                }
+                var secureStringConverter = new SecureStringConverter();
+                writer.WriteValue(secureStringConverter.ConvertSecureStringToPlainString(secureString));
             }
         }
     }
