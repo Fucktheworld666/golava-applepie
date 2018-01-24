@@ -27,6 +27,6 @@ namespace GoLava.ApplePie.Contracts
         /// <value><c>true</c> if two step authentication is required; otherwise, <c>false</c>.</value>
         [JsonIgnore]
         public bool IsTwoStepRequired 
-            => this.AuthType.Equals("hsa", StringComparison.InvariantCultureIgnoreCase);
+            => this.AuthType != null && this.AuthType.Equals("hsa", StringComparison.InvariantCultureIgnoreCase);
     }
 }
