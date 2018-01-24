@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
-    public class AppleDeveloperClient : ClientBase<IAppleDeveloperUrlProvider>
+    public class AppleDeveloperClient : ClientBase<IAppleDeveloperUrlProvider>, IAppleDeveloperClient
     {
         private readonly CustomPropertyNamesContractResolver _resolver = new CustomPropertyNamesContractResolver();
 

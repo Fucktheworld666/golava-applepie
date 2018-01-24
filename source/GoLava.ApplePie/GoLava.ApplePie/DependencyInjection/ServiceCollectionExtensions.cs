@@ -2,6 +2,9 @@
 using System.Linq;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Clients.ApplePie;
+using GoLava.ApplePie.Components;
+using GoLava.ApplePie.Security;
+using GoLava.ApplePie.Security.CertificateStores;
 using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Transfer;
 using GoLava.ApplePie.Transfer.Resolvers;
@@ -30,10 +33,15 @@ namespace GoLava.ApplePie.DependencyInjection
                 NullValueHandling = NullValueHandling.Ignore
             });
 
+            services.AddSingleton<IEnvironmentDetector, EnvironmentDetector>();
+            services.AddSingleton<IProcessRunner, ProcessRunner>();
             services.AddSingleton<IJsonSerializer>(jsonSerializer);
             services.AddSingleton<IRestClient, RestClient>();
+            services.AddSingleton<IKeychain, Keychain>();
+            services.AddSingleton<ICertificateStoreProxy, CertificateStoreProxy>();
 
-            services.AddSingleton<AppleDeveloperClient>();
+            services.AddSingleton<IAppleDeveloperClient, AppleDeveloperClient>();
+            services.AddSingleton<ICertificates, Certificates>();
             services.AddSingleton<ApplePieClient>();
         }
     }

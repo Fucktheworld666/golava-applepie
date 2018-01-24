@@ -17,7 +17,7 @@ namespace GoLava.ApplePie.Clients
     /// <summary>
     /// The base for all apple related clients.
     /// </summary>
-    public abstract class ClientBase<TUrlProvider>
+    public abstract class ClientBase<TUrlProvider> : IClientBase
         where TUrlProvider: IUrlProvider
     {
         private readonly NamedFormatter _namedFormatter;

@@ -31,7 +31,7 @@ namespace GoLava.ApplePie.App
             var serviceProvider = ConfigureServices();
             var appliePieClient = serviceProvider.GetService<ApplePieClient>();
 
-            var appleDeveloperClient = new AppleDeveloperClient();
+            var appleDeveloperClient = serviceProvider.GetService<IAppleDeveloperClient>();
 
             Console.WriteLine("Enter Apple Account Name:");
             var accountName = Console.ReadLine();
@@ -94,6 +94,10 @@ namespace GoLava.ApplePie.App
 
                     foreach (var application in applications) 
                     {
+                        var c = await appliePieClient.Certificates.CreateCertificateAsync(
+                            context, application, CertificateTypeDisplayId.DevelopmentPush, password);
+
+
                         var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, application);
                         Console.WriteLine("\tApplication: {0}", applicationDetails.Name);
 

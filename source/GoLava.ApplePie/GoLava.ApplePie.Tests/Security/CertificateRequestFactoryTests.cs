@@ -1,5 +1,4 @@
-﻿using System.Security;
-using GoLava.ApplePie.Security;
+﻿using GoLava.ApplePie.Security;
 using Xunit;
 
 namespace GoLava.ApplePie.Tests.Security
@@ -37,15 +36,7 @@ namespace GoLava.ApplePie.Tests.Security
         private CertificateRequestWithPrivateKey CreateCertificateRequestWithPrivateKey()
         {
             var certificateRequestFactory = new CertificateRequestFactory();
-            return certificateRequestFactory.CreateCertificateRequestWithPrivateKey(CreateSecureString("secret"));
-        }
-
-        private SecureString CreateSecureString(string plainString)
-        {
-            var secureString = new SecureString();
-            foreach (var c in plainString)
-                secureString.AppendChar(c);
-            return secureString;
+            return certificateRequestFactory.CreateCertificateRequestWithPrivateKey();
         }
     }
 }

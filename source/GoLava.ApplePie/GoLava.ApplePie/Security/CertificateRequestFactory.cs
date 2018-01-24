@@ -32,7 +32,7 @@ namespace GoLava.ApplePie.Security
         /// <summary>
         /// Creates a certificate request with private key.
         /// </summary>
-        public CertificateRequestWithPrivateKey CreateCertificateRequestWithPrivateKey(SecureString securePassword)
+        public CertificateRequestWithPrivateKey CreateCertificateRequestWithPrivateKey()
         {
             var rsaKeyPairGenerator = new RsaKeyPairGenerator();
             rsaKeyPairGenerator.Init(new KeyGenerationParameters(
@@ -49,11 +49,10 @@ namespace GoLava.ApplePie.Security
                 asymmetricCipherKeyPair.Public,
                 null,
                 asymmetricCipherKeyPair.Private);
-            var encryptedPrivateKey = this.EncryptPrivateKey(asymmetricCipherKeyPair.Private, securePassword);
             return new CertificateRequestWithPrivateKey
             {
                 CertificateRequest = EncodePem(pkcs10CertificationRequest),
-                PrivateKey = EncodePem(encryptedPrivateKey),
+                PrivateKey = EncodePem(asymmetricCipherKeyPair.Private),
                 PublicKey = EncodePem(asymmetricCipherKeyPair.Public)
             };
         }

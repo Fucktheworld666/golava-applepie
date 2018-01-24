@@ -1,7 +1,7 @@
 ﻿using System;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Clients.ApplePie;
-using GoLava.ApplePie.Clients.ApplePie.CertificateStores;
+using GoLava.ApplePie.Security.CertificateStores;
 
 namespace GoLava.ApplePie
 {

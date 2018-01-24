@@ -4,23 +4,28 @@ using System.Threading.Tasks;
 using GoLava.ApplePie.Clients;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Clients.ApplePie;
+using GoLava.ApplePie.Components;
 using GoLava.ApplePie.Contracts;
+using GoLava.ApplePie.Security;
+using GoLava.ApplePie.Security.CertificateStores;
 
 namespace GoLava.ApplePie
 {
     public class ApplePieClient
     {
+        private readonly IAppleDeveloperClient _appleDeveloperClient;
         private Applications _applications;
-        private Certificates _certificates;
+        private ICertificates _certificates;
         private Devices _devices;
         private Teams _teams;
 
         public ApplePieClient(
-            AppleDeveloperClient appleDeveloperClient,
-            ICertificateStore certificateStore)
+            IAppleDeveloperClient appleDeveloperClient,
+            ICertificates certificates)
         {
-            this.AppleDeveloperClient = appleDeveloperClient;
-            this.CertificateStore = certificateStore;
+            _appleDeveloperClient = appleDeveloperClient;
+
+            this.Certificates = certificates;
         }
 
         /// <summary>
@@ -34,10 +39,7 @@ namespace GoLava.ApplePie
         /// <summary>
         /// Gets access to the certificates API.
         /// </summary>
-        public Certificates Certificates
-        {
-            get { return _certificates ?? (_certificates = new Certificates(this)); }
-        }
+        public ICertificates Certificates { get; }
 
         /// <summary>
         /// Gets access to the devices API.
@@ -63,7 +65,7 @@ namespace GoLava.ApplePie
         /// <param name="password">The password to use when logging on..</param>
         public Task<ClientContext> LogonWithCredentialsAsync(string username, string password)
         {
-            return this.AppleDeveloperClient.LogonWithCredentialsAsync(username, password);
+            return _appleDeveloperClient.LogonWithCredentialsAsync(username, password);
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace GoLava.ApplePie
         /// <param name="password">The password to use when logging on..</param>
         public Task<ClientContext> LogonWithCredentialsAsync(string username, SecureString password)
         {
-            return this.AppleDeveloperClient.LogonWithCredentialsAsync(username, password);
+            return _appleDeveloperClient.LogonWithCredentialsAsync(username, password);
         }
 
         /// <summary>
@@ -85,7 +87,7 @@ namespace GoLava.ApplePie
         /// <param name="trustedDevice">Trusted device.</param>
         public Task<ClientContext> AcquireTwoStepCodeAsync(ClientContext context, TrustedDevice trustedDevice)
         {
-            return this.AppleDeveloperClient.AcquireTwoStepCodeAsync(context, trustedDevice);
+            return _appleDeveloperClient.AcquireTwoStepCodeAsync(context, trustedDevice);
         }
 
         /// <summary>
@@ -96,11 +98,13 @@ namespace GoLava.ApplePie
         /// <param name="code">The code to be used to finalize the two-step authentication.</param>
         public Task<ClientContext> LogonWithTwoStepCodeAsync(ClientContext context, string code)
         {
-            return this.AppleDeveloperClient.LogonWithTwoStepCodeAsync(context, code);
+            return _appleDeveloperClient.LogonWithTwoStepCodeAsync(context, code);
         }
 
         internal ICertificateStore CertificateStore { get; }
 
-        internal AppleDeveloperClient AppleDeveloperClient { get; }
+        internal IEnvironmentDetector EnvironmentDetector { get; }
+
+        internal IKeychain Keychain { get; }
     }
 }
