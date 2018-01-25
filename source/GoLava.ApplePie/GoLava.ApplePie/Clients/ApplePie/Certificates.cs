@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Contracts.AppleDeveloper;
 using GoLava.ApplePie.Exceptions;
+using GoLava.ApplePie.Extensions;
 using GoLava.ApplePie.Security;
 using GoLava.ApplePie.Security.CertificateStores;
 using GoLava.ApplePie.Threading;
@@ -38,8 +39,7 @@ namespace GoLava.ApplePie.Clients.ApplePie
             var randomBytes = new byte[18];
             secureRandom.NextBytes(randomBytes);
 
-            var password = new char[24];
-            Convert.ToBase64CharArray(randomBytes, 0, randomBytes.Length, password, 0);
+            var password = randomBytes.ToHexCharArray();
             Array.Clear(randomBytes, 0, randomBytes.Length);
 
             try 
