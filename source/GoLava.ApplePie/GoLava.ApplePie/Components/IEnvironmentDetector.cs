@@ -7,5 +7,7 @@
         bool IsUnix { get; }
 
         bool IsWindows { get; }
+
+        string HomeDirectory { get; }
     }
 }

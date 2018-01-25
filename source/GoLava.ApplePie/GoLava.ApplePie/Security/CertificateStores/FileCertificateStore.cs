@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,54 +10,68 @@ namespace GoLava.ApplePie.Security.CertificateStores
 {
     public class FileCertificateStore : ICertificateStore
     {
-        private const string PrivateKeyFileExtension = ".p8";
+        private const string PrivateCertificateFileExtension = ".p12";
 
         public async Task DeleteAsync(string id)
         {
             await Configure.AwaitFalse();
 
-            this.DeleteFile(id, PrivateKeyFileExtension);
+            this.DeleteFile(id, PrivateCertificateFileExtension);
 
             await Task.CompletedTask;
         }
 
-        public async Task<string> RetrievePrivateKeyAsync(string id)
+        public async Task<PrivateCertificate> RetrievePrivateCertificateAsync(string id)
         {
             await Configure.AwaitFalse();
 
             try
             {
-                var filePath = this.GetFile(id, PrivateKeyFileExtension);
-                using (var reader = new StreamReader(filePath, Encoding.UTF8))
+                var filePath = this.GetFile(id, PrivateCertificateFileExtension);
+
+                using (var ms = new MemoryStream())
                 {
-                    var privateKey = await reader.ReadToEndAsync();
-                    return privateKey;
+                    var buffer = new byte[4096];
+                    using (var file = File.OpenRead(filePath))
+                    {
+                        var read = await file.ReadAsync(buffer, 0, buffer.Length);
+                        while (read > 0)
+                        {
+                            await ms.WriteAsync(buffer, 0, read);
+                            read = await file.ReadAsync(buffer, 0, buffer.Length);
+                        }
+                    }
+
+                    return new PrivateCertificate
+                    {
+                        Pkcs12 = ms.ToArray()
+                    };
                 }
             }
             catch (Exception ex)
             {
                 throw new ApplePieCertificateStoreException(
-                    $"Failed to retrieve private key with id '{id}'. See inner exception for more details.", ex);
+                    $"Failed to retrieve private certificate with id '{id}'. See inner exception for more details.", ex);
             }
         }
 
-        public async Task StorePrivateKeyAsync(string id, string privateKey)
+        public async Task StorePrivateCertificateAsync(string id, PrivateCertificate privateCertificate)
         {
             await Configure.AwaitFalse();
 
             try
             {
-
-                var filePath = this.GetFile(id, PrivateKeyFileExtension);
-                using (var writer = new StreamWriter(filePath, false, Encoding.UTF8))
+                var filePath = this.GetFile(id, PrivateCertificateFileExtension);
+                using (var file = File.OpenWrite(filePath))
                 {
-                    await writer.WriteAsync(privateKey);
+                    var pkcs12 = privateCertificate.Pkcs12;
+                    await file.WriteAsync(pkcs12, 0, pkcs12.Length);
                 }
             }
             catch (Exception ex)
             {
                 throw new ApplePieCertificateStoreException(
-                    $"Failed to store private key with id '{id}'. See inner exception for more details.", ex);
+                    $"Failed to store private certificate with id '{id}'. See inner exception for more details.", ex);
             }
         }
 

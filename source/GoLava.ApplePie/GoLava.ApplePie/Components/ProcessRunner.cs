@@ -16,7 +16,8 @@ namespace GoLava.ApplePie.Components
             var tcs = new TaskCompletionSource<ProcessResult>();
             var result = new ProcessResult
             {
-                Output = new List<ProcessOutput>()
+                Output = new List<ProcessOutput>(),
+                StartTime = DateTime.Now,
             };
 
             startInfo.RedirectStandardOutput = true;
@@ -61,6 +62,8 @@ namespace GoLava.ApplePie.Components
             }
             void onProcessExited(object s, EventArgs e)
             {
+                process.WaitForExit(-1);
+
                 process.OutputDataReceived -= onOutputDataReceived;
                 process.ErrorDataReceived -= onErrorDataReceived;
                 process.Exited -= onProcessExited;
@@ -78,7 +81,6 @@ namespace GoLava.ApplePie.Components
             process.Exited += onProcessExited;
 
             process.Start();
-            result.StartTime = process.StartTime;
 
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();

@@ -7,8 +7,8 @@ namespace GoLava.ApplePie.Security.CertificateStores
     {
         Task DeleteAsync(string id);
 
-        Task<string> RetrievePrivateKeyAsync(string id);
+        Task<PrivateCertificate> RetrievePrivateCertificateAsync(string id);
 
-        Task StorePrivateKeyAsync(string id, string privateKey);
+        Task StorePrivateCertificateAsync(string id, PrivateCertificate privateCertificate);
     }
 }

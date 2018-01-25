@@ -9,6 +9,7 @@ namespace GoLava.ApplePie.Tests.Extensions
         [InlineData(null, "''")]
         [InlineData("", "''")]
         [InlineData("It's better to give than to receive", "It\\'s\\ better\\ to\\ give\\ than\\ to\\ receive")]
+        [InlineData("foo '\\\"' bar", "foo\\ \\'\\\\\"\\'\\ bar")]
         public void ShellEscape(string input, string expected)
         {
             var actual = input.ShellEscape();

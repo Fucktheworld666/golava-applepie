@@ -1,4 +1,5 @@
-﻿using System.Security;
+﻿using System;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using GoLava.ApplePie.Clients.AppleDeveloper;
@@ -13,28 +14,71 @@ namespace GoLava.ApplePie.Clients.ApplePie
     public sealed class Certificates : ICertificates
     {
         private readonly IAppleDeveloperClient _appleDeveloperClient;
-        private readonly ICertificateStoreProxy _certificateStoreProxy;
-        private readonly CertificateRequestFactory _certificateRequestFactory;
+        private readonly ICertificateStoreKeychainProxy _certificateStoreProxy;
+        private readonly CertificateRequestCreator _certificateRequestCreator;
+        private readonly PrivateCertificateCreator _privateCertificateCreator;
         
         public Certificates(
             IAppleDeveloperClient appleDeveloperClient,
-            ICertificateStoreProxy cerificateStoreProxy)
+            ICertificateStoreKeychainProxy cerificateStoreProxy)
         {
             _appleDeveloperClient = appleDeveloperClient;
             _certificateStoreProxy = cerificateStoreProxy;
-            _certificateRequestFactory = new CertificateRequestFactory();
+            _certificateRequestCreator = new CertificateRequestCreator();
+            _privateCertificateCreator = new PrivateCertificateCreator();
+        }
+
+        public async Task<X509Certificate2> CreateCertificateAsync(ClientContext clientContext, Application application, CertificateTypeDisplayId certificateType)
+        {
+            await Configure.AwaitFalse();
+
+            var secureRandomProvider = new SecureRandomProvider();
+            var secureRandom = secureRandomProvider.GetSecureRandom();
+
+            var randomBytes = new byte[18];
+            secureRandom.NextBytes(randomBytes);
+
+            var password = new char[24];
+            Convert.ToBase64CharArray(randomBytes, 0, randomBytes.Length, password, 0);
+            Array.Clear(randomBytes, 0, randomBytes.Length);
+
+            try 
+            {
+                return await this.CreateCertificateAsync(clientContext, application, certificateType, password);
+            }
+            finally
+            {
+                Array.Clear(password, 0, password.Length);
+            }
         }
 
         public async Task<X509Certificate2> CreateCertificateAsync(ClientContext clientContext, Application application, CertificateTypeDisplayId certificateType, SecureString securePassword)
         {
             await Configure.AwaitFalse();
 
-            X509Certificate2 certificate = null;
+            var secureStringConverter = new SecureStringConverter();
+            var password = secureStringConverter.ConvertSecureStringToPlainCharArray(securePassword);
             try
             {
+                return await this.CreateCertificateAsync(clientContext, application, certificateType, password);
+            }
+            finally
+            {
+                Array.Clear(password, 0, password.Length);
+            }
+        }
 
-                var certificateRequestWithPrivateKey = _certificateRequestFactory.CreateCertificateRequestWithPrivateKey();
-                var certificateRequest = await _appleDeveloperClient.SubmitCertificateSigningRequestAsync(
+        public async Task<X509Certificate2> CreateCertificateAsync(ClientContext clientContext, Application application, CertificateTypeDisplayId certificateType, char[] password)
+        {
+            await Configure.AwaitFalse();
+
+            X509Certificate2 certificate = null;
+            CertificateRequest certificateRequest = null;
+            try
+            {
+                var certificateRequestWithPrivateKey = _certificateRequestCreator.CreateCertificateRequestWithPrivateKey();
+
+                certificateRequest = await _appleDeveloperClient.SubmitCertificateSigningRequestAsync(
                     clientContext,
                     application.TeamId,
                     new CertificateSigningRequest
@@ -47,26 +91,25 @@ namespace GoLava.ApplePie.Clients.ApplePie
                 );
 
                 certificate = await _appleDeveloperClient.DownloadCertificateAsync(
-                    clientContext, 
+                    clientContext,
                     certificateRequest);
 
-                await _certificateStoreProxy.StorePrivateKeyAsync(
-                    certificate.Thumbprint, 
-                    certificateRequestWithPrivateKey.PrivateKey);
-
-
-                /*
-                if (_applePieClient.EnvironmentDetector.IsMac)
-                {
-          //          var importResult = await _applePieClient.Keychain.ImportAsync("", ".");
-                }*/
+                var pirvateCertificate = _privateCertificateCreator.CreatePrivateCertificate(
+                    certificate, certificateRequestWithPrivateKey.PrivateKey,
+                    password);
+                                                    
+                await _certificateStoreProxy.StorePrivateCertificateAsync(
+                    certificate.Thumbprint,
+                    pirvateCertificate,
+                    password);
 
                 return certificate;
             }
             catch (ApplePieCertificateStoreException)
             {
                 // we need to rollback
-                // await _appleDeveloperClient.RevokeCertificateRequestAsync(clientContext, certificateRequest);
+                if (certificateRequest != null)
+                    await _appleDeveloperClient.RevokeCertificateRequestAsync(clientContext, certificateRequest);
                 throw;
             }
         }

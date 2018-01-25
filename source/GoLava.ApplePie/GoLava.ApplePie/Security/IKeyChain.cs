@@ -1,10 +1,15 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace GoLava.ApplePie.Security
 {
     public interface IKeychain
     {
-        Task<bool> ImportAsync(string path, string keychainPath, string keychainPassword = "", string certificatePassword = "");
+        Task<bool> ImportBinaryDataAsync(byte[] certificateData, string certificatePassword);
+
+        Task<bool> ImportBinaryDataAsync(byte[] certificateData, string certificatePassword, string keychainFile, string keychainPassword);
+
+        Task<bool> ImportFileAsync(string certificateFile, string certificatePassword);
+
+        Task<bool> ImportFileAsync(string certificateFile, string certificatePassword, string keychainFile, string keychainPassword);
     }
 }

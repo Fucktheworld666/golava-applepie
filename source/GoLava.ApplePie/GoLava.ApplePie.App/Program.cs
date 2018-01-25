@@ -95,7 +95,7 @@ namespace GoLava.ApplePie.App
                     foreach (var application in applications) 
                     {
                         var c = await appliePieClient.Certificates.CreateCertificateAsync(
-                            context, application, CertificateTypeDisplayId.DevelopmentPush, password);
+                            context, application, CertificateTypeDisplayId.DevelopmentPush);
 
 
                         var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, application);
@@ -161,6 +161,7 @@ namespace GoLava.ApplePie.App
                 var i = Console.ReadKey(true);
                 if (i.Key == ConsoleKey.Enter)
                 {
+                    Console.Write(i.KeyChar);
                     break;
                 }
                 else if (i.Key == ConsoleKey.Backspace)

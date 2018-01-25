@@ -3,7 +3,7 @@ using Xunit;
 
 namespace GoLava.ApplePie.Tests.Security
 {
-    public class CertificateRequestFactoryTests
+    public class CertificateRequestCreatorTests
     {
         [Fact]
         public void CreateCertificateRequestWithPrivateKeyReturnsNotNull()
@@ -35,8 +35,8 @@ namespace GoLava.ApplePie.Tests.Security
 
         private CertificateRequestWithPrivateKey CreateCertificateRequestWithPrivateKey()
         {
-            var certificateRequestFactory = new CertificateRequestFactory();
-            return certificateRequestFactory.CreateCertificateRequestWithPrivateKey();
+            var certificateRequestCreator = new CertificateRequestCreator();
+            return certificateRequestCreator.CreateCertificateRequestWithPrivateKey();
         }
     }
 }

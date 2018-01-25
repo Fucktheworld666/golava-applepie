@@ -248,7 +248,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.DownloadCertificateUrl, new { 
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.RevokeCertificateUrl, new { 
                 platform = certificateRequest.Platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
                 { "teamId", certificateRequest.TeamId },
@@ -260,7 +260,12 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var response = await this.SendAsync<Result<CertificateRequest>>(context, request);
             this.CheckResultForErrors(response.Content);
 
-            return response.Content.Data;
+            var newCertificateRequest = response.Content.Data;
+            if (newCertificateRequest != null)
+            {
+                newCertificateRequest.TeamId = certificateRequest.TeamId;
+            }
+            return newCertificateRequest;
         }
 
         public async Task<CertificateRequest> SubmitCertificateSigningRequestAsync(ClientContext context, CertificateSigningRequest certSigningRequest, Platform platform = Platform.Ios)
@@ -284,7 +289,12 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var response = await this.SendAsync<Result<CertificateRequest>>(context, request);
             this.CheckResultForErrors(response.Content);
 
-            return response.Content.Data;
+            var newCertificateRequest = response.Content.Data;
+            if (newCertificateRequest != null)
+            {
+                newCertificateRequest.TeamId = teamId;
+            }
+            return newCertificateRequest;
         }
 
         public async Task<List<Device>> GetDevicesAsync(ClientContext context, Platform platform = Platform.Ios)
@@ -538,7 +548,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
 
         private void CheckResultForErrors(Result result)
         {
-            if (!string.IsNullOrEmpty(result.UserString))
+            if (!string.IsNullOrEmpty(result.UserString) && result.ResultCode != 0)
                 throw new ApplePieException(result.UserString);
 
             if (result.ValidationMessages != null && result.ValidationMessages.Count > 0)

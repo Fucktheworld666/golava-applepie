@@ -13,9 +13,9 @@ using Org.BouncyCastle.Pkcs;
 namespace GoLava.ApplePie.Security
 {
     /// <summary>
-    /// A certificate request factory.
+    /// A certificate request creator.
     /// </summary>
-    public class CertificateRequestFactory
+    public class CertificateRequestCreator
     {
         private readonly SecureRandomProvider _secureRandomProvider;
         private readonly SecureStringConverter _secureStringConverter;
@@ -23,25 +23,21 @@ namespace GoLava.ApplePie.Security
         /// <summary>
         /// Initializes a new instance of the <see cref="T:GoLava.ApplePie.Security.CertificateRequestFactory"/> class.
         /// </summary>
-        public CertificateRequestFactory()
+        public CertificateRequestCreator()
         {
             _secureRandomProvider = new SecureRandomProvider();
             _secureStringConverter = new SecureStringConverter();
         }
 
-        /// <summary>
-        /// Creates a certificate request with private key.
-        /// </summary>
         public CertificateRequestWithPrivateKey CreateCertificateRequestWithPrivateKey()
         {
             var rsaKeyPairGenerator = new RsaKeyPairGenerator();
             rsaKeyPairGenerator.Init(new KeyGenerationParameters(
                 _secureRandomProvider.GetSecureRandom(), 2048));
             
-
             var asymmetricCipherKeyPair = rsaKeyPairGenerator.GenerateKeyPair();
             var asn1SignatureFactory = new Asn1SignatureFactory(
-                    "SHA1WITHRSA",
+                    "SHA256WITHRSA",
                     asymmetricCipherKeyPair.Private);
             var pkcs10CertificationRequest = new Pkcs10CertificationRequest(
                 asn1SignatureFactory,
@@ -57,23 +53,15 @@ namespace GoLava.ApplePie.Security
             };
         }
 
-        private object EncryptPrivateKey(AsymmetricKeyParameter privateKey, SecureString securePassword, int iterationCount = 1000000)
+        private object EncryptPrivateKey(AsymmetricKeyParameter privateKey, char[] password, int iterationCount = 1000000)
         {
-            var plainPassword = _secureStringConverter.ConvertSecureStringToPlainCharArray(securePassword);
-            try
+            var pkcs8Generator = new Pkcs8Generator(privateKey, BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.Id)
             {
-                var pkcs8Generator = new Pkcs8Generator(privateKey, BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.Id)
-                {
-                    IterationCount = iterationCount,
-                    Password = plainPassword,
-                    SecureRandom = _secureRandomProvider.GetSecureRandom()
-                };
-                return pkcs8Generator.Generate();
-            }
-            finally
-            {
-                Array.Clear(plainPassword, 0, plainPassword.Length);
-            }
+                IterationCount = iterationCount,
+                Password = password,
+                SecureRandom = _secureRandomProvider.GetSecureRandom()
+            };
+            return pkcs8Generator.Generate();
         }
 
         private static string EncodePem(object obj)

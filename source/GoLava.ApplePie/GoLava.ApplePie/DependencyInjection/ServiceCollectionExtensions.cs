@@ -38,7 +38,7 @@ namespace GoLava.ApplePie.DependencyInjection
             services.AddSingleton<IJsonSerializer>(jsonSerializer);
             services.AddSingleton<IRestClient, RestClient>();
             services.AddSingleton<IKeychain, Keychain>();
-            services.AddSingleton<ICertificateStoreProxy, CertificateStoreProxy>();
+            services.AddSingleton<ICertificateStoreKeychainProxy, CertificateStoreKeychainProxy>();
 
             services.AddSingleton<IAppleDeveloperClient, AppleDeveloperClient>();
             services.AddSingleton<ICertificates, Certificates>();
