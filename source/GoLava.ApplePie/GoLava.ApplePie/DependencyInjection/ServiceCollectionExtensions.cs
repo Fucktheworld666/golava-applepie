@@ -3,6 +3,7 @@ using System.Linq;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Clients.ApplePie;
 using GoLava.ApplePie.Components;
+using GoLava.ApplePie.Logging;
 using GoLava.ApplePie.Security;
 using GoLava.ApplePie.Security.CertificateStores;
 using GoLava.ApplePie.Serializers;
@@ -23,6 +24,7 @@ namespace GoLava.ApplePie.DependencyInjection
             var options = new ApplePieOptions();
             setup?.Invoke(options);
 
+            services.AddSingleton<ILogClient>(options.LogClientFactory);
             services.AddSingleton<IAppleDeveloperUrlProvider>(options.AppleDeveloperFactory);
             services.AddSingleton<ICertificateStore>(options.CertificateStoreFactory);
             services.AddSingleton<ApplePieOptions>(options);

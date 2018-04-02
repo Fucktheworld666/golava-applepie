@@ -40,7 +40,6 @@
     <Folder Include="Clients\ApplePie\" />
     <Folder Include="DependencyInjection\" />
     <Folder Include="Security\CertificateStores\" />
-    <Folder Include="Components\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
