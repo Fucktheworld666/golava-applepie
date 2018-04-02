@@ -2,6 +2,7 @@
 using GoLava.ApplePie.Components;
 using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Extensions;
+using GoLava.ApplePie.Logging;
 using GoLava.ApplePie.Security.CertificateStores;
 using GoLava.ApplePie.Threading;
 
@@ -12,15 +13,18 @@ namespace GoLava.ApplePie.Security
         private readonly ICertificateStore _certificateStore;
         private readonly IKeychain _keychain;
         private readonly IEnvironmentDetector _environmentDetector;
+        private readonly ILogClient _logClient;
 
         public CertificateStoreKeychainProxy(
             ICertificateStore certificateStore, 
             IKeychain keychain, 
-            IEnvironmentDetector environmentDetector)
+            IEnvironmentDetector environmentDetector,
+            ILogClient logClient)
         {
             _certificateStore = certificateStore;
             _keychain = keychain;
             _environmentDetector = environmentDetector;
+            _logClient = logClient;
         }
 
         public Task DeleteAsync(string id)
@@ -54,6 +58,10 @@ namespace GoLava.ApplePie.Security
                 {
                     password.Clear();
                 }
+            }
+            else
+            {
+                _logClient.Warning("Windows Environment: No keychain supported.");
             }
         }
     }
