@@ -43,9 +43,9 @@
         /// <param name="logClient">The log client to be used to write the message.</param>
         /// <param name="fmt">Format to be used to build the message to log using string.Format.</param>
         /// <param name="args">Arguments to be to build the message to log using string.Format.</param>
-        public static void Debug(this ILogClient logClient, string fmt, params object[] args)
+        public static void LogDebug(this ILogClient logClient, string fmt, params object[] args)
         {
-            Write(logClient, LogLevel.Debug, fmt, args);
+            LogMessage(logClient, LogLevel.Debug, fmt, args);
         }
 
         /// <summary>
@@ -54,9 +54,9 @@
         /// <param name="logClient">The log client to be used to write the message.</param>
         /// <param name="fmt">Format to be used to build the message to log using string.Format.</param>
         /// <param name="args">Arguments to be to build the message to log using string.Format.</param>
-        public static void Info(this ILogClient logClient, string fmt, params object[] args)
+        public static void LogInfo(this ILogClient logClient, string fmt, params object[] args)
         {
-            Write(logClient, LogLevel.Info, fmt, args);
+            LogMessage(logClient, LogLevel.Info, fmt, args);
         }
 
         /// <summary>
@@ -65,9 +65,9 @@
         /// <param name="logClient">The log client to be used to write the message.</param>
         /// <param name="fmt">Format to be used to build the message to log using string.Format.</param>
         /// <param name="args">Arguments to be to build the message to log using string.Format.</param>
-        public static void Warning(this ILogClient logClient, string fmt, params object[] args)
+        public static void LogWarning(this ILogClient logClient, string fmt, params object[] args)
         {
-            Write(logClient, LogLevel.Warning, fmt, args);
+            LogMessage(logClient, LogLevel.Warning, fmt, args);
         }
 
         /// <summary>
@@ -76,18 +76,18 @@
         /// <param name="logClient">The log client to be used to write the message.</param>
         /// <param name="fmt">Format to be used to build the message to log using string.Format.</param>
         /// <param name="args">Arguments to be to build the message to log using string.Format.</param>
-        public static void Error(this ILogClient logClient, string fmt, params object[] args)
+        public static void LogError(this ILogClient logClient, string fmt, params object[] args)
         {
-            Write(logClient, LogLevel.Error, fmt, args);
+            LogMessage(logClient, LogLevel.Error, fmt, args);
         }
 
-        private static void Write(ILogClient logClient, LogLevel logLevel, string fmt, params object[] args)
+        private static void LogMessage(ILogClient logClient, LogLevel logLevel, string fmt, params object[] args)
         {
             if (!logClient.IsEnabled(logLevel))
                 return;
 
             var message = string.Format(fmt, args);
-            logClient.Write(logLevel, message);
+            logClient.LogMessage(logLevel, message);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace GoLava.ApplePie.Logging
             return true;
         }
 
-        public void Write(LogLevel logLevel, string message)
+        public void LogMessage(LogLevel logLevel, string message)
         {
             Console.WriteLine("{0:yyyyMMddHHmmss}::{1,-7}::{2}", DateTime.UtcNow, logLevel, message);
         }

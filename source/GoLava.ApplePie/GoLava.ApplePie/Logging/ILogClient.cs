@@ -16,6 +16,6 @@
         /// </summary>
         /// <param name="logLevel">The log level that is used to log the message.</param>
         /// <param name="message">The log message to be written.</param>
-        void Write(LogLevel logLevel, string message);
+        void LogMessage(LogLevel logLevel, string message);
     }
 }

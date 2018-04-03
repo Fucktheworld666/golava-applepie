@@ -61,7 +61,7 @@ namespace GoLava.ApplePie.Security
             }
             else
             {
-                _logClient.Warning("Windows Environment: No keychain supported.");
+                _logClient.LogWarning("Windows Environment: No keychain supported.");
             }
         }
     }
