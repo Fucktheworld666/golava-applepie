@@ -15,7 +15,6 @@ namespace GoLava.ApplePie
     {
         private readonly IAppleDeveloperClient _appleDeveloperClient;
         private Applications _applications;
-        private ICertificates _certificates;
         private Devices _devices;
         private Teams _teams;
 
