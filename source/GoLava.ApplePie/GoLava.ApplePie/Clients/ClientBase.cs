@@ -211,6 +211,7 @@ namespace GoLava.ApplePie.Clients
                 switch (apre.Response.StatusCode)
                 {
                     case HttpStatusCode.Forbidden:
+					case HttpStatusCode.Unauthorized:
                         throw new ApplePieCredentialsException($"Invalid username and password combination. Used '{credentials.AccountName}' as the username.", apre);
 
                     case HttpStatusCode.Conflict:
