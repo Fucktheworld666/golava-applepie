@@ -129,14 +129,13 @@ namespace GoLava.ApplePie.Transfer
             await Configure.AwaitFalse();
 
             var restResponse = await this.CreateRestResponseAsync<RestResponse<TContent>>(context, httpRequest, httpResponse);
-            if (httpResponse.IsSuccessStatusCode)
+            
+			if (restResponse.ContentType == RestContentType.Json)
             {
-                if (restResponse.ContentType == RestContentType.Json)
-                {
-                    var content = _jsonSerializer.Deserialize<TContent>(restResponse.RawContent.ToString());
-                    restResponse.Content = content;
-                }
+                var content = _jsonSerializer.Deserialize<TContent>(restResponse.RawContent.ToString());
+                restResponse.Content = content;
             }
+
             return restResponse;
         }
 

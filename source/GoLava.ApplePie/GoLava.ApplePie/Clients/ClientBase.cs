@@ -20,7 +20,7 @@ namespace GoLava.ApplePie.Clients
     public abstract class ClientBase<TUrlProvider> : IClientBase
         where TUrlProvider: IUrlProvider
     {
-        private readonly NamedFormatter _namedFormatter;
+		private readonly NamedFormatter _namedFormatter;
 
         protected ClientBase(TUrlProvider urlProvider, IRestClient restClient, IJsonSerializer jsonSerializer)
         {
@@ -97,6 +97,11 @@ namespace GoLava.ApplePie.Clients
                 // todo log exception
                 context.Authentication = Authentication.FailedWithInvalidCredentials;
             }
+            catch (ApplePieAcknowledgeAppleIdAndPrivacyStatementException)
+			{
+				// todo log exception
+				context.Authentication = Authentication.FailedNeedsToAcknowledgeAppleIdAndPrivacyStatement;
+			}
             catch (ApplePieException)
             {
                 // todo log exception
@@ -210,6 +215,11 @@ namespace GoLava.ApplePie.Clients
 
                     case HttpStatusCode.Conflict:
                         return await this.HandleTwoStepAuthenticationAsync(context, apre.Response);
+
+					case HttpStatusCode.PreconditionFailed:
+						if (IsWellKnownAuthType(apre.Response?.Content?.AuthType))
+							throw new ApplePieAcknowledgeAppleIdAndPrivacyStatementException(apre);
+						break;
                 }
                 throw;
             }
@@ -474,5 +484,19 @@ namespace GoLava.ApplePie.Clients
 
             return CsrfClass.Undefined;
         }
+
+        private static bool IsWellKnownAuthType(string authType)
+		{
+			switch (authType)
+			{
+				case "sa":
+				case "hsa":
+				case "non-sa":
+				case "hsa2":
+					return true;
+				default:
+					return false;
+			}
+		}
     }
 }
