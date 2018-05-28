@@ -141,7 +141,7 @@ namespace GoLava.ApplePie.Transfer
 
         private RestContentType ConvertContentType(HttpContentHeaders contentHeaders)
         {
-            switch (contentHeaders.ContentType.MediaType.ToLowerInvariant())
+            switch (contentHeaders?.ContentType?.MediaType?.ToLowerInvariant())
             {
                 case "text/plain":
                     return RestContentType.Text;
