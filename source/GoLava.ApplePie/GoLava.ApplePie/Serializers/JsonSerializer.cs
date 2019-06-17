@@ -1,4 +1,5 @@
 ﻿using System;
+using GoLava.ApplePie.Transfer.Resolvers;
 using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Serializers
@@ -6,8 +7,17 @@ namespace GoLava.ApplePie.Serializers
     /// <summary>
     /// Serialize and deserialize JSON encoded strings.
     /// </summary>
-    public class JsonSerializer
+    public class JsonSerializer : IJsonSerializer
     {
+        public static IJsonSerializer Create()
+        {
+            return new JsonSerializer(new JsonSerializerSettings
+            {
+                ContractResolver = new CustomPropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore
+            });
+        }
+
         private readonly JsonSerializerSettings _jsonSerializerSettings;
 
         /// <summary>

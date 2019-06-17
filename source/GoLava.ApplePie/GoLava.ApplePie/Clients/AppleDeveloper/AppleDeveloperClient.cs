@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using GoLava.ApplePie.Contracts.AppleDeveloper;
 using GoLava.ApplePie.Exceptions;
 using GoLava.ApplePie.Extensions;
+using GoLava.ApplePie.Serializers;
 using GoLava.ApplePie.Threading;
 using GoLava.ApplePie.Transfer;
 using GoLava.ApplePie.Transfer.Content;
@@ -16,18 +17,18 @@ using Newtonsoft.Json;
 
 namespace GoLava.ApplePie.Clients.AppleDeveloper
 {
-    public class AppleDeveloperClient : ClientBase<IAppleDeveloperUrlProvider>
+    public class AppleDeveloperClient : ClientBase<IAppleDeveloperUrlProvider>, IAppleDeveloperClient
     {
         private readonly CustomPropertyNamesContractResolver _resolver = new CustomPropertyNamesContractResolver();
 
         public AppleDeveloperClient()
-            : this(new AppleDeveloperUrlProvider()) { }
+            : this(new AppleDeveloperUrlProvider(), Serializers.JsonSerializer.Create()) { }
 
-        public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider)
-                : base(urlProvider) { }
+        public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider, IJsonSerializer jsonSerializer)
+            : base(urlProvider, new RestClient(jsonSerializer), jsonSerializer) { }
 
-        public AppleDeveloperClient(RestClient restClient, IAppleDeveloperUrlProvider urlProvider)
-            : base(restClient, urlProvider) { }
+        public AppleDeveloperClient(IAppleDeveloperUrlProvider urlProvider, IRestClient restClient, IJsonSerializer jsonSerializer)
+            : base(urlProvider, restClient, jsonSerializer) { }
 
         public async Task<List<Team>> GetTeamsAsync(ClientContext context)
         {
@@ -247,7 +248,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
         {
             await Configure.AwaitFalse();
 
-            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.DownloadCertificateUrl, new { 
+            var uriBuilder = new AppleDeveloperRequestUriBuilder(new RestUri(this.UrlProvider.RevokeCertificateUrl, new { 
                 platform = certificateRequest.Platform }));
             uriBuilder.AddQueryValues(new Dictionary<string, string> {
                 { "teamId", certificateRequest.TeamId },
@@ -259,7 +260,20 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var response = await this.SendAsync<Result<CertificateRequest>>(context, request);
             this.CheckResultForErrors(response.Content);
 
-            return response.Content.Data;
+            var newCertificateRequest = response.Content.Data;
+            if (newCertificateRequest != null)
+            {
+                newCertificateRequest.TeamId = certificateRequest.TeamId;
+            }
+            return newCertificateRequest;
+        }
+
+        public async Task<CertificateRequest> SubmitCertificateSigningRequestAsync(ClientContext context, CertificateSigningRequest certSigningRequest, Platform platform = Platform.Ios)
+        {
+            await Configure.AwaitFalse();
+
+            var team = await this.GetTeamAsync(context.AsCacheContext());
+            return await this.SubmitCertificateSigningRequestAsync(context, team.TeamId, certSigningRequest, platform);
         }
 
         public async Task<CertificateRequest> SubmitCertificateSigningRequestAsync(ClientContext context, string teamId, CertificateSigningRequest certSigningRequest, Platform platform = Platform.Ios)
@@ -275,7 +289,12 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
             var response = await this.SendAsync<Result<CertificateRequest>>(context, request);
             this.CheckResultForErrors(response.Content);
 
-            return response.Content.Data;
+            var newCertificateRequest = response.Content.Data;
+            if (newCertificateRequest != null)
+            {
+                newCertificateRequest.TeamId = teamId;
+            }
+            return newCertificateRequest;
         }
 
         public async Task<List<Device>> GetDevicesAsync(ClientContext context, Platform platform = Platform.Ios)
@@ -529,7 +548,7 @@ namespace GoLava.ApplePie.Clients.AppleDeveloper
 
         private void CheckResultForErrors(Result result)
         {
-            if (!string.IsNullOrEmpty(result.UserString))
+            if (!string.IsNullOrEmpty(result.UserString) && result.ResultCode != 0)
                 throw new ApplePieException(result.UserString);
 
             if (result.ValidationMessages != null && result.ValidationMessages.Count > 0)

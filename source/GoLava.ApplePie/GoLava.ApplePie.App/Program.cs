@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using GoLava.ApplePie.Clients.AppleDeveloper;
 using GoLava.ApplePie.Contracts;
 using GoLava.ApplePie.Contracts.AppleDeveloper;
+using GoLava.ApplePie.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GoLava.ApplePie.App
 {
@@ -14,9 +16,22 @@ namespace GoLava.ApplePie.App
 
         static void Main(string[] args) => MainAsync(args).Wait();
 
+        private static IServiceProvider ConfigureServices()
+        {
+            //setup dependency injection
+            var services = new ServiceCollection();
+            services.AddApplePie();
+
+            var serviceProvider = services.BuildServiceProvider();
+            return serviceProvider;
+        }
+
         static async Task MainAsync(string[] args)
         {
-            var appleDeveloperClient = new AppleDeveloperClient(new AppleDeveloperUrlProvider());
+            var serviceProvider = ConfigureServices();
+            var appliePieClient = serviceProvider.GetService<ApplePieClient>();
+
+            var appleDeveloperClient = serviceProvider.GetService<IAppleDeveloperClient>();
 
             Console.WriteLine("Enter Apple Account Name:");
             var accountName = Console.ReadLine();
@@ -72,11 +87,17 @@ namespace GoLava.ApplePie.App
                         Console.WriteLine("\tCertificate: {0}", cert.Subject);
                     }
 
+
+
                     var applications = await appleDeveloperClient.GetApplicationsAsync(context, team.TeamId);
                     Console.WriteLine("Team {0}: applications count: {1}", team.TeamId, applications.Count);
 
                     foreach (var application in applications) 
                     {
+                        var c = await appliePieClient.Certificates.CreateCertificateAsync(
+                            context, application, CertificateTypeDisplayId.DevelopmentPush);
+
+
                         var applicationDetails = await appleDeveloperClient.GetApplicationDetails(context, application);
                         Console.WriteLine("\tApplication: {0}", applicationDetails.Name);
 
@@ -140,6 +161,7 @@ namespace GoLava.ApplePie.App
                 var i = Console.ReadKey(true);
                 if (i.Key == ConsoleKey.Enter)
                 {
+                    Console.Write(i.KeyChar);
                     break;
                 }
                 else if (i.Key == ConsoleKey.Backspace)

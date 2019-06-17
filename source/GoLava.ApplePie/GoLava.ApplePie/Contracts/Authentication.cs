@@ -35,6 +35,10 @@
         /// A value indicating that authentication has failed because no trusted device was found.
         /// </summary>
         FailedNoTrustedDeviceFound,
+        /// <summary>
+        /// A value indicating that the apple id and privacy statement needs to be acknowledged.
+        /// </summary>
+        FailedNeedsToAcknowledgeAppleIdAndPrivacyStatement
     }
 
     public static class AuthenticationExtensions
@@ -43,7 +47,8 @@
         {
             return authentication == Authentication.FailedUnexpected
                 || authentication == Authentication.FailedNoTrustedDeviceFound
-                || authentication == Authentication.FailedWithInvalidCredentials;
+                || authentication == Authentication.FailedWithInvalidCredentials
+			    || authentication == Authentication.FailedNeedsToAcknowledgeAppleIdAndPrivacyStatement;
         }
     }
 }

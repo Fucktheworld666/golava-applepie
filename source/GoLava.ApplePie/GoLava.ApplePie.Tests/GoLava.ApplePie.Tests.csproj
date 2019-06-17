@@ -28,6 +28,7 @@
     <Folder Include="Serializers\" />
     <Folder Include="Clients\" />
     <Folder Include="Clients\AppleDeveloper\" />
+    <Folder Include="Security\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="GoLava.ApplePie.Tests.nuspec" />
